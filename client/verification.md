@@ -618,3 +618,51 @@ npm run build ✅（素材经 vite:asset 管线入 dist，js 95.57 kB / css 38.7
 - [x] **声明：仍未执行 npm run dist，未创建任何 Release / git commit**
 
 已停止，等待审核（关卡 A）。
+
+---
+
+# v1.0.0 关卡 B 发布门验收（2026-11-13）
+
+> 本节修正上文「未执行 npm run dist / 未创建 git commit」的历史状态：打包已发生（2026-09-19 14:26），
+> Git 基线已于 2026-11-13 建立。
+
+## 基线
+- 分支 `main`（原 master 更名，与 ci.yml 触发分支对齐）
+- 提交 `4901112`：198 文件 / 15,556 行插入
+- tag `v1.0.0`（annotated，本地未推送）
+- 规格文档更名：`第三阶段_Steam高保真UI实施规格.md` → `第三阶段_高保真商店UI实施规格.md`
+
+## 产物
+| 文件 | 字节数 | SHA-256 |
+|---|---|---|
+| 不玩游戏 Setup 1.0.0.exe | 108,287,473 | 2422a83c7f2ad1da898e83b4729671f5d2d09641e824eae8f9b493f523314c7c |
+| 不玩游戏-Portable-1.0.0.exe | 108,059,756 | 116229acf3cb5c207caf868d2d4938944524b52a855b85886cb682671c28b9e8 |
+
+## 终验矩阵
+- [x] `npm run build`：PASS（1.86s，入口 js 99.03 kB / gzip 33.54）
+- [x] `npm test`：**50/50 PASS**（0 fail / 0 skipped）
+- [x] `npm run visual:compare`：**26/26 ✅**，`compare: 全部一致`，**真实退出码 0**，端口 5173 归零
+- [x] 打包版启动（win-unpacked）：4 进程，主窗口标题「不玩游戏」，0.5s 出窗
+- [x] 优雅关闭（WM_CLOSE）：4 进程 → 0，≤0.5s；leveldb 写入时刻与关闭时刻一致（flush 生效）
+- [x] 三条退出链路同源（源码证据）：`shell.js:78` 菜单退出复用 `nw-window-control` → `main.js:48` `win.close()`
+- [x] 安装版：`/S` 安装退出码 0（7.9s）→ 启动 0.5s → 关闭归零 → `/S` 卸载 3.6s
+- [x] 卸载残留：进程 0 / 注册表项 0 / 桌面与开始菜单快捷方式 0
+- [x] 便携版：2.5s 出窗（自解压），关闭后进程 0、临时解压残留 0
+- [x] 启动参数纪律：打包版无 `--no-sandbox` / `--remote-debugging-port`；
+      GPU 禁用由 `main.js:8-10`（`appendSwitch` + `disableHardwareAcceleration`）代码级保障
+- [x] 禁入项扫描：暂存 198 路径中 node_modules / dist / release / .workbuddy / 日志 / 临时图 = 0
+
+## 未通过 / 未验证项
+- [ ] Edge E2E 各批次场景回归：本次未复跑
+- [ ] GitHub Actions 远端全绿：无远端仓库，从未运行
+- [ ] 安装包 dev 依赖审计：未做 asar 逐项核对
+- [ ] 仓库 Steam 相关表述：文件名已改，正文仍提及，公开前需自查
+
+## 环境陷阱（复现必须遵守）
+网关注入 `ELECTRON_RUN_AS_NODE=1` 与 `NODE_OPTIONS=--require .../node-language-shim.cjs` 时，
+直接启动打包产物会被当作 Node 执行（`bad option: --disable-gpu`，退出码 9）。
+验收前必须 `Remove-Item Env:ELECTRON_RUN_AS_NODE; Remove-Item Env:NODE_OPTIONS`。
+
+## 判定
+**CONCERNS** —— 质量门与真机验收全项 PASS；阻塞公开发布的仅剩：CI 从未远端运行、
+安装包未与提交绑定（建议重打并刷新 SHA-256）、Steam 相关表述自查。

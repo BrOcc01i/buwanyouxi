@@ -56,6 +56,21 @@ npm run preview    # 生产构建 + electron 加载 dist
 npm run dist       # electron-builder 打包 Windows 安装版 + 便携版（release/）
 ```
 
+## 下载与校验（v1.0.0）
+
+| 文件 | 字节数 | SHA-256 |
+|---|---|---|
+| `不玩游戏 Setup 1.0.0.exe` | 108,287,473 | `2422a83c7f2ad1da898e83b4729671f5d2d09641e824eae8f9b493f523314c7c` |
+| `不玩游戏-Portable-1.0.0.exe` | 108,059,756 | `116229acf3cb5c207caf868d2d4938944524b52a855b85886cb682671c28b9e8` |
+
+校验方法（Windows 命令行）：
+
+```cmd
+certutil -hashfile "不玩游戏 Setup 1.0.0.exe" SHA256
+```
+
+版本号三处一致：`package.json` 1.0.0 / 应用内「关于」与设置页 1.0.0（`APP_VERSION`）/ Git tag `v1.0.0`。
+
 ## Windows SmartScreen 提示
 
 本项目的 Windows 安装包与便携版**未进行代码签名**（首版不购买签名证书）。首次运行时，Windows SmartScreen 可能弹出「Windows 已保护你的电脑」提示——这是所有未签名应用的正常现象。请点击「更多信息」→「仍要运行」。可通过页面下方 SHA-256 校验值核对文件完整性。
