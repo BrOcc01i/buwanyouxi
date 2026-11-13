@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 120" role="img" aria-label="轨道市集">
+  <defs>
+    <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5ad1a0"/><stop offset="1" stop-color="#5aa9ff"/>
+    </linearGradient>
+  </defs>
+  <text x="14" y="72" font-family="'Microsoft YaHei','PingFang SC',sans-serif" font-size="58" font-weight="900" fill="url(#lg)" stroke="rgba(0,0,0,.35)" stroke-width="1.5" paint-order="stroke" letter-spacing="4">轨道市集</text>
+  <text x="16" y="104" font-family="'Microsoft YaHei',sans-serif" font-size="19" font-weight="600" fill="#a8cfd8" letter-spacing="7">ORBIT MARKET</text>
+</svg>

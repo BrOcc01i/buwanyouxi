@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>不玩游戏 — 一种关于"拥有"的体验</title>
+  <meta name="description" content="不玩游戏：只模拟一次完整获取游戏的过程。">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ============ P1 首页 ============ -->
+  <section id="view-home" class="view" hidden>
+    <header class="page-head">
+      <h1 class="site-title">不玩游戏</h1>
+      <p class="site-subtitle">一种关于"拥有"的体验</p>
+    </header>
+
+    <div id="owned-strip" class="owned-strip" hidden>
+      <div class="owned-strip__label">我的游戏库</div>
+      <div id="owned-strip__icons" class="owned-strip__icons"></div>
+    </div>
+
+    <div id="game-grid" class="game-grid"></div>
+
+    <footer class="page-foot">每款游戏都是虚构的，不会真的下载任何东西。</footer>
+  </section>
+
+  <!-- ============ P2 游戏详情 ============ -->
+  <section id="view-game" class="view" hidden>
+    <button id="game-back" class="btn btn-ghost btn-back">← 返回</button>
+    <div class="detail">
+      <div id="detail-cover" class="detail-cover"></div>
+      <h2 id="detail-name" class="detail-name"></h2>
+      <p id="detail-desc" class="detail-desc"></p>
+      <div id="detail-tags" class="tag-row"></div>
+      <div class="detail-meta">
+        <span id="detail-size" class="meta-chip"></span>
+        <span id="detail-rating" class="meta-chip"></span>
+        <span id="detail-owners" class="meta-chip"></span>
+      </div>
+      <button id="acquire-btn" class="btn btn-primary btn-lg">免费获取</button>
+    </div>
+  </section>
+
+  <!-- ============ P3 下载安装流程（全屏沉浸） ============ -->
+  <section id="view-play" class="view view-play" hidden>
+    <div class="play-head">
+      <span id="play-icon" class="play-icon"></span>
+      <div class="play-title-wrap">
+        <div id="play-name" class="play-name"></div>
+        <div id="play-stage" class="play-stage"></div>
+      </div>
+      <span id="play-cancel" class="play-cancel" title="取消">取消</span>
+    </div>
+
+    <div class="play-main">
+      <div class="progress-wrap">
+        <div class="progress-meta">
+          <span id="play-percent" class="play-percent">0%</span>
+          <span id="play-speed" class="play-speed"></span>
+          <span id="play-eta" class="play-eta"></span>
+        </div>
+        <div class="progress-track">
+          <div id="play-bar" class="progress-bar"></div>
+        </div>
+
+        <!-- 安装阶段子进度（默认隐藏） -->
+        <div id="install-extra" class="install-extra" hidden>
+          <div id="install-subtext" class="install-subtext"></div>
+          <div class="progress-track progress-track--sub">
+            <div id="install-subbar" class="progress-bar"></div>
+          </div>
+        </div>
+      </div>
+
+      <details id="play-log-wrap" class="play-log-wrap">
+        <summary>查看传输日志</summary>
+        <div id="play-log" class="play-log"></div>
+      </details>
+    </div>
+
+    <div class="play-foot">
+      <!-- 模拟桌面 -->
+      <div id="desktop" class="desktop">
+        <div class="desktop__label">桌面</div>
+        <div id="desktop-icons" class="desktop__icons"></div>
+      </div>
+      <div class="play-actions">
+        <button id="launch-btn" class="btn btn-primary btn-lg" disabled hidden>启动游戏</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ P4 完成 / 揭示页 ============ -->
+  <section id="view-done" class="view" hidden>
+    <div class="done">
+      <h2 class="done-title">你刚刚完成了一次完整的游戏获取流程</h2>
+      <p class="done-reveal">搜索、选择、下载、安装、启动——每一步都认真走了。只是这一次，你的硬盘里什么都没有多出来。</p>
+      <p class="done-question">但我们想问问：刚才那几分钟，你有一点满足吗？</p>
+
+      <form id="survey-form" class="survey">
+        <fieldset class="survey-q">
+          <legend>1. 刚才那几分钟，你获得了类似真正下载 / 买到一个游戏的满足感吗？<em>*</em></legend>
+          <div id="q1-stars" class="stars">
+            <button type="button" class="star" data-v="1">★</button>
+            <button type="button" class="star" data-v="2">★</button>
+            <button type="button" class="star" data-v="3">★</button>
+            <button type="button" class="star" data-v="4">★</button>
+            <button type="button" class="star" data-v="5">★</button>
+          </div>
+          <input type="hidden" id="q1-value" value="">
+        </fieldset>
+
+        <fieldset class="survey-q">
+          <legend>2. 如果这个过程不需要真实下载，你是否愿意偶尔再来一次？<em>*</em></legend>
+          <label class="radio"><input type="radio" name="q2" value="愿意"> 愿意</label>
+          <label class="radio"><input type="radio" name="q2" value="无所谓"> 无所谓</label>
+          <label class="radio"><input type="radio" name="q2" value="不愿意"> 不愿意</label>
+        </fieldset>
+
+        <fieldset class="survey-q">
+          <legend>3. 哪个瞬间感觉最好 / 最想关掉？（一句话即可，可跳过）</legend>
+          <input type="text" id="q3" class="text-input" placeholder="哪个瞬间感觉最好 / 最想关掉？" maxlength="200">
+        </fieldset>
+
+        <button type="submit" id="survey-submit" class="btn btn-primary btn-lg">提交</button>
+      </form>
+
+      <div id="survey-thanks" class="survey-thanks" hidden>
+        <p class="thanks-line">感谢，实验数据已记录。</p>
+        <button id="replay-btn" class="btn btn-primary btn-lg">再体验一个</button>
+        <button id="share-btn" class="btn btn-ghost">复制链接分享给朋友</button>
+      </div>
+
+      <button id="export-btn" class="export-link" title="下载 bg_events JSON">导出实验数据</button>
+    </div>
+  </section>
+
+  <!-- ============ P5 伪启动覆盖态 ============ -->
+  <div id="launch-overlay" class="launch-overlay" hidden>
+    <div class="launch-inner">
+      <div id="launch-logo" class="launch-logo">NEBULA WORKS</div>
+      <div id="launch-title" class="launch-title" hidden></div>
+      <div id="launch-prompt" class="launch-prompt" hidden>按任意键开始</div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

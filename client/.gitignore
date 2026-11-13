@@ -1,0 +1,14 @@
+# Electron + Vite 客户端
+node_modules/
+dist/
+dist-electron/
+*.log
+.DS_Store
+
+# 临时验证文件/目录（.tmp-* 前缀）
+.tmp-*
+.tmp-electron-profile/
+
+# Electron 构建产物
+out/
+release/
