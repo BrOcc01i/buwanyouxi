@@ -38,19 +38,21 @@
 - [x] README.md：中文为主 + 英文简介、项目定位、截图、功能边界、隐私说明、运行/构建方式、非隶属声明、SmartScreen 提示
 - [x] PRIVACY.md、LICENSE（MIT）就位
 - [x] `.gitignore` 排除：node_modules/、dist/、release/、临时验证目录、Steam 参考图片
-- [ ] 仓库不含任何 Steam 商标 / 素材 / 参考图（文件名已改为「第三阶段_高保真商店UI实施规格.md」，但该文档正文仍多处提及 Steam，公开前需自查）
+- [ ] 仓库不含任何 Steam 商标 / 素材 / 参考图（文件名已改为「第三阶段_高保真商店UI实施规格.md」；正文仍有 3 处提及，均为**描述设计参考**或**明令禁止使用其素材**，不含任何素材文件。仓库已公开，如需彻底清除需重写历史）
 
 ## 5. CI
 
-- [ ] GitHub Actions（windows-latest）双工作流全绿：`ci.yml`（push/PR：install → test → build，**不含打包**）与 `package.yml`（仅 workflow_dispatch 手动触发：install → test → build → package）
-      —— 未配置远端、从未在 GitHub 上运行过；本次仅本地验证两者配置正确（分支已由 master 改为 main，与 ci.yml 触发分支对齐）
+- [x] GitHub Actions（windows-latest）双工作流全绿：`ci.yml`（push/PR：install → test → build，**不含打包**）与 `package.yml`（仅 workflow_dispatch 手动触发：install → test → build → package）
+      —— 2026-11-14 首次远端运行：`feat(batch6)` run `43551284127` 与 `docs` run `43551430004` 均 **success**
+      （windows job 9 步全通过：Install dependencies → Unit tests → Production build）
 
 ## 6. 发布（最终审核后）
 
-- [x] Release tag：`v1.0.0`（本地 annotated tag 已建，未推送）
-- [ ] 附件：安装版 + 便携版 + SHA-256 校验值
+- [x] Release tag：`v1.0.0`（已推送到 https://github.com/BrOcc01i/buwanyouxi）
+- [ ] 附件：安装版 + 便携版 + SHA-256 校验值（exe 未入库，需在 Release 附件上传）
 - [ ] Release 说明包含：功能简介、离线声明、隐私说明、SmartScreen 未签名提示、非隶属声明
 - [x] 不实现自动更新（规格既定）
+- [x] 在线试玩：https://brocc01i.github.io/buwanyouxi/ （Pages 由 `gh-pages` 分支发布）
 
 ---
 
