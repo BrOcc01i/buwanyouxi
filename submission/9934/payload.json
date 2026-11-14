@@ -1,0 +1,15 @@
+{
+  "_note": "9934 投稿正文草稿。url 与 source_url 待定稿；cover_media_id / display_media_ids 由 submit.mjs 上传后回填。字段依据 https://9934.zrainbow1257.com/api/openapi.json 的 GameSubmissionContent。",
+  "resource_kind": "game",
+  "title": "不玩游戏",
+  "description": "一个完全离线的虚拟游戏客户端。\n\n商店、库、下载队列、安装进度、成就和体验报告全部是模拟的：不联网、不下载真实文件、不启动外部程序。你可以把 6 款虚构游戏加入库，看着进度条从 0 爬到 100%，在「校验文件完整性」和「正在安装」之间等待，最后揭开封面——它复刻的不是玩游戏，而是买游戏、等下载、把东西收进库的那种踏实感。\n\n打开即玩，进度保存在浏览器本地，随时可清空。",
+  "url": "https://wbapp-2dudtnqv6wzny0cakya40o.app.workbuddy.host/?sharecode=MTHIS5RECT",
+  "source_url": "__PENDING_GITHUB__",
+  "author_name": "Broccoli66657",
+  "role": "author",
+  "category": "休闲",
+  "controls": "鼠标操作 · 建议桌面浏览器，1280×720 以上",
+  "rights": true,
+  "cover_media_id": "__COVER__",
+  "display_media_ids": ["__DISPLAY_1__", "__DISPLAY_2__", "__DISPLAY_3__", "__DISPLAY_4__", "__DISPLAY_5__", "__DISPLAY_6__"]
+}

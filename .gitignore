@@ -39,3 +39,10 @@ Thumbs.db
 
 # Steam 参考截图（批次 1 对照用，严禁入库）
 client/screenshots/steam-*.png
+
+# 9934 上架：发布副本由 client/dist 生成，原始截图可由基线重出
+web-publish/
+submission/9934/raw/
+
+# 发布应用标记（本地工具用）
+.wbapp_*.genie
