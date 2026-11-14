@@ -18,7 +18,7 @@ export function renderStore(view) {
           <p class="page__sub">${GAMES.length} 款虚构作品 · 全部本地数据，不会真实下载任何东西</p>
         </div>
         <nav class="chips" id="store-chips" aria-label="分类筛选"></nav>
-        <input id="store-search" class="store-search" type="search" placeholder="搜索游戏、标签或发行商" autocomplete="off" aria-label="搜索" />
+        <input id="store-search" class="store-search" type="search" placeholder="搜索作品或标签" autocomplete="off" aria-label="搜索" />
       </div>
       <button class="storehero" id="store-hero" aria-label="焦点推荐：${featured.name}">
         <span class="storehero__img">${artImg(featured, 'header', 'storehero__bg', featured.name)}</span>
