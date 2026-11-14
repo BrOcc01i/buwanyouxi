@@ -24,9 +24,9 @@ export const BADGES = {
   },
   shelf_all: {
     id: 'shelf_all',
-    name: '六款齐收',
-    desc: '把六款虚构游戏全部收入库中',
-    cond: '集齐全部 6 款游戏',
+    name: '架上无空',
+    desc: '把目录里的作品全部收入库中',
+    cond: '集齐当前目录的全部作品（数量随目录增长）',
     icon: '🗃️',
   },
   first_reveal: {

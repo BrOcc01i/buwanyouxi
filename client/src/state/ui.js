@@ -2,6 +2,7 @@
 // 不持久化 —— 每次启动都回到库主页，与 Steam 行为一致
 'use strict';
 import { GAMES } from '../data/games.js';
+import { isCategoryKey } from '../data/categories.js';
 
 const GAME_IDS = new Set(GAMES.map(g => g.id));
 let selectedGameId = null;
@@ -48,4 +49,22 @@ export function setSidebarSort(v) {
 export function subscribeSidebar(fn) {
   sidebarListeners.add(fn);
   return () => { sidebarListeners.delete(fn); };
+}
+
+/* ---- 批次 6：商店分类筛选（UI 态，不持久化、不进导出） ---- */
+let storeCategory = 'all';   // 'all' | CATEGORY_KEYS 之一
+const storeCatListeners = new Set();
+
+export function getStoreCategory() { return storeCategory; }
+
+export function setStoreCategory(v) {
+  if (v !== 'all' && !isCategoryKey(v)) return;   // 非法值静默忽略
+  if (v === storeCategory) return;
+  storeCategory = v;
+  storeCatListeners.forEach(fn => { try { fn(); } catch (e) { /* 忽略 */ } });
+}
+
+export function subscribeStoreCategory(fn) {
+  storeCatListeners.add(fn);
+  return () => { storeCatListeners.delete(fn); };
 }

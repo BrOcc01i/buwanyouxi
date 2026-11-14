@@ -46,3 +46,7 @@ submission/9934/raw/
 
 # 发布应用标记（本地工具用）
 .wbapp_*.genie
+
+# 出图投递目录：只保留说明，生成的原始大图不入库
+art-inbox/*
+!art-inbox/README.md

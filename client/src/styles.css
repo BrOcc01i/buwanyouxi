@@ -1272,3 +1272,49 @@ img[data-fb] { display: block; }
 .badge-hero.is-on .badge-hero__name { color: #e8c477; }
 .badge-hero__state { margin-top: 2px; font-size: 11.5px; color: var(--ink-3); }
 .badge-hero__desc { margin: 12px 0 0; font-size: 12.5px; color: var(--ink-2); line-height: 1.6; }
+
+/* ============================================================
+   批次 6：商店分类筛选（页头一行、chips、页内搜索、空态）
+   ============================================================ */
+
+/* 页头：标题/副标 + chips + 搜索同处一行，避免额外占 48px 行高 */
+.page__head--store {
+  display: flex; flex-wrap: wrap; align-items: flex-end;
+  gap: 8px 16px; margin-bottom: 18px;
+}
+.page__headtext { flex: 0 0 auto; }
+.page__headtext h2 { font-size: 22px; font-weight: 700; color: var(--ink); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; flex: 1 1 auto; min-width: 0; }
+.chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  height: 28px; padding: 0 11px; border-radius: 999px; cursor: pointer;
+  background: rgba(255, 255, 255, .04); border: 1px solid var(--line);
+  color: var(--ink-2); font: inherit; font-size: 12.5px; white-space: nowrap;
+  transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+.chip:hover { border-color: rgba(102, 192, 244, .35); color: var(--ink); }
+.chip.is-active {
+  background: rgba(102, 192, 244, .14); border-color: var(--accent); color: var(--accent-strong);
+}
+.chip__n { font-size: 11px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.chip.is-active .chip__n { color: var(--accent); }
+
+.store-search {
+  flex: 0 0 210px; height: 30px; padding: 0 10px; border-radius: var(--radius);
+  background: rgba(255, 255, 255, .05); border: 1px solid var(--line);
+  color: var(--ink); font: inherit; font-size: 12.5px; outline: none;
+}
+.store-search::placeholder { color: var(--ink-3); }
+.store-search:focus { border-color: var(--accent); background: rgba(102, 192, 244, .07); }
+
+/* 筛选后的空态（与网格同级，常驻 DOM 只切 hidden） */
+.grid__empty {
+  margin-top: 18px; padding: 34px 20px; text-align: center;
+  border: 1px dashed var(--line); border-radius: var(--radius-lg);
+  color: var(--ink-2); font-size: 13.5px;
+}
+.grid__empty p { margin-bottom: 12px; }
+
+/* hidden 必须真的隐藏（.card 自带 display:flex） */
+.card[hidden] { display: none !important; }

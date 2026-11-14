@@ -47,12 +47,13 @@ test('evaluateBadges：启动 1 次 → first_launch；10 次 → 追加 launch_
   assert.deepEqual(ids(rules.evaluateBadges(s)), ['first_launch', 'launch_ten']);
 });
 
-test('evaluateBadges：库内 3 款 → shelf_three；集齐 6 款 → shelf_all', () => {
+test('evaluateBadges：库内 3 款 → shelf_three；集齐全部（TOTAL_GAMES）→ shelf_all', () => {
   const s = store.emptyState();
   const entry = id => ({ gameId: id, status: 'owned', ownedAt: 1, installedAt: null, progress: 0, favorite: false, lastLaunchedAt: null, launchCount: 0 });
   ['a', 'b', 'c'].forEach(id => { s.library[id] = entry(id); });
   assert.deepEqual(ids(rules.evaluateBadges(s)), ['shelf_three']);
-  ['d', 'e', 'f'].forEach(id => { s.library[id] = entry(id); });
+  // 目录规模随批次增长：这里按当前 TOTAL_GAMES 填满，避免把「6 款」写死
+  for (let i = 3; i < rules.TOTAL_GAMES; i++) s.library['g' + i] = entry('g' + i);
   assert.deepEqual(ids(rules.evaluateBadges(s)), ['shelf_three', 'shelf_all']);
 });
 

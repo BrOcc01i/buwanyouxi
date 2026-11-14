@@ -100,9 +100,12 @@ test('卸载（§6.4）：installed→owned，installedAt/进度清除，ownedAt
   assert.equal(JSON.stringify(getState().library), before);
 });
 
-test('素材字段（§9）：六款游戏 assets 齐全且路径指向各自目录', async () => {
+test('素材字段（§9）：全部游戏的 assets 齐全且路径指向各自目录', async () => {
   const { GAMES } = await import('../src/data/games.js');
-  assert.equal(GAMES.length, 6);
+  // 目录会随批次增长，这里只锁「存量 6 个 id 不得删除」与「每款素材齐全」
+  const LEGACY_IDS = ['stardust-miner', 'cloud-bakery', 'neon-drift', 'corridor-seven', 'orbit-market', 'echo-archive'];
+  assert.ok(GAMES.length >= LEGACY_IDS.length, '目录不得少于存量 6 款');
+  for (const id of LEGACY_IDS) assert.ok(GAMES.some(g => g.id === id), `存量 id 被删除：${id}`);
   for (const g of GAMES) {
     const a = g.assets;
     assert.ok(a, g.id + ' 缺 assets');
