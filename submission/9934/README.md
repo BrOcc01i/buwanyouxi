@@ -10,16 +10,17 @@
 
 | 项 | 状态 |
 |---|---|
-| 可玩网页版 | ✅ 已发布 <https://wbapp-2dudtnqv6wzny0cakya40o.app.workbuddy.host/?sharecode=MTHIS5RECT> |
-| 浏览器实测 | ✅ 5 个路由全渲染，0 个 ≥400 响应，0 破图 |
+| 可玩网页版 | ✅ **https://brocc01i.github.io/buwanyouxi/**（GitHub Pages，公开、无需分享码） |
+| 浏览器实测 | ✅ 商店/库/下载/设置/详情全渲染，徽章墙 8 格，0 个 ≥400 响应，0 破图 |
+| 源码仓库 | ✅ https://github.com/BrOcc01i/buwanyouxi （公开，含 `v1.0.0` tag 与 CI 工作流） |
 | 封面 | ✅ `media/01-cover.webp`（130 KB） |
 | 展示图 6 张 | ✅ `media/02…07`，最大 133 KB（限额 1,400,000 B） |
 | 正文文案 | ✅ `payload.json`（含批次 6 的徽章与心意） |
-| 执行脚本 | ✅ `submit.mjs`（`--dry` 校验通过，仅 `source_url` 未定稿） |
-| 作者令牌 | ❌ 待本人签发 |
-| `source_url` | ❌ 待定（建议 GitHub 仓库） |
+| 执行脚本 | ✅ `submit.mjs`，`--dry` **全部通过** |
+| `url` / `source_url` | ✅ 已定稿：Pages 地址 / GitHub 仓库 |
+| 作者令牌 | ❌ 唯一剩余阻塞 |
 
-> ⚠️ 线上链接目前仍是**批次 6 之前**的构建；徽章墙与心意礼物要等重新发布后才在线可见。重发后需再跑一次 Playwright 截图复核。
+> 备用地址（带分享码，仅本机分享用）：<https://wbapp-2dudtnqv6wzny0cakya40o.app.workbuddy.host/?sharecode=MTHIS5RECT>
 
 ## 站点硬性约束（摘自公开契约）
 

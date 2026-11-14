@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1200px; background: #14171e; color: #c7d5e0;
+    font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { padding: 64px 76px 56px; }
+  .kicker { font-size: 15px; letter-spacing: .22em; color: #66c0f4; text-transform: uppercase; }
+  h1 { margin-top: 14px; font-size: 58px; line-height: 1.15; color: #fff; letter-spacing: .01em; }
+  .sub { margin-top: 14px; font-size: 22px; color: #8f98a0; }
+  .rule { height: 1px; background: linear-gradient(90deg, #66c0f4, transparent); margin: 40px 0 44px; }
+  h2 {
+    font-size: 26px; color: #fff; margin: 44px 0 18px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  h2::before { content: ""; width: 6px; height: 24px; border-radius: 3px; background: #66c0f4; }
+  p { font-size: 20px; line-height: 1.85; color: #b8c7d6; margin: 12px 0; }
+  strong { color: #fff; font-weight: 600; }
+  .em { color: #e8c477; }
+  ul { margin: 14px 0 6px; }
+  li {
+    font-size: 19.5px; line-height: 1.9; color: #b8c7d6;
+    list-style: none; padding-left: 26px; position: relative;
+  }
+  li::before {
+    content: ""; position: absolute; left: 6px; top: 15px;
+    width: 7px; height: 7px; border-radius: 50%; background: #4c6b82;
+  }
+  li b { color: #e5effa; font-weight: 600; }
+  .quote {
+    margin: 26px 0 8px; padding: 22px 26px; border-left: 3px solid #66c0f4;
+    background: rgba(102, 192, 244, .06); border-radius: 0 8px 8px 0;
+    font-size: 21px; line-height: 1.8; color: #dfeaf5;
+  }
+  .facts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 34px; margin-top: 18px; }
+  .fact { display: flex; justify-content: space-between; gap: 16px; font-size: 19px; padding: 10px 0; border-bottom: 1px solid #232c3a; }
+  .fact span { color: #7f8b98; }
+  .fact b { color: #dfeaf5; font-weight: 600; text-align: right; }
+  .foot {
+    margin-top: 48px; padding-top: 22px; border-top: 1px solid #232c3a;
+    font-size: 16.5px; line-height: 1.8; color: #67707b;
+  }
+  .tagrow { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 26px; }
+  .tag {
+    font-size: 16px; color: #9fb6c9; padding: 6px 14px;
+    border: 1px solid #2a3548; border-radius: 999px; background: rgba(255,255,255,.02);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">离线 · 纯前端 · 无账号</div>
+  <h1>不玩游戏</h1>
+  <div class="sub">一个完全离线的虚拟游戏客户端</div>
+
+  <div class="rule"></div>
+
+  <h2>这是什么</h2>
+  <p>一个在浏览器里打开就能用的<b>游戏客户端</b>：商店、库、下载队列、安装进度、徽章、体验报告，整套东西都在——</p>
+  <p>但<span class="em">没有一件是真的</span>。不联网、不下载真实文件、不启动外部程序。六款游戏、评分、获取人数，全部是本地虚构常量。</p>
+
+  <h2>能做什么</h2>
+  <ul>
+    <li><b>逛商店</b>　六款虚构游戏，各有主视觉、截图、标签与简介</li>
+    <li><b>加进库</b>　获取后进入下载队列，进度条从 0 爬到 100%</li>
+    <li><b>等一遍完整流程</b>　准备 → 下载 → 校验 SHA-256 → 安装 → 创建快捷方式</li>
+    <li><b>揭开封面</b>　安装完成那一步单独做了页面，会给你一张「拥有者类型」结果卡</li>
+    <li><b>攒徽章</b>　八枚，从「首次下载」到「六款齐收」</li>
+    <li><b>送心意</b>　本地虚拟货币，给虚构工作室送 6 / 18 / 66，纯模拟，不涉及支付</li>
+  </ul>
+
+  <h2>它想复刻什么</h2>
+  <div class="quote">不是玩游戏，是买游戏、等下载、把东西收进库的那点踏实感。</div>
+  <p>进度条走得慢的时候，你会发现自己其实在等一句「已完成」。</p>
+
+  <h2>技术</h2>
+  <div class="facts">
+    <div class="fact"><span>客户端</span><b>Electron + Vite</b></div>
+    <div class="fact"><span>渲染层</span><b>原生 JS，无框架</b></div>
+    <div class="fact"><span>数据</span><b>只写 localStorage</b></div>
+    <div class="fact"><span>网络请求</span><b>零</b></div>
+  </div>
+  <p>桌面版是 Windows 安装包；网页版是同一套渲染层直接跑，功能一致。清空数据一键回到初始状态。</p>
+
+  <div class="tagrow">
+    <span class="tag">离线体验</span>
+    <span class="tag">模拟下载</span>
+    <span class="tag">徽章</span>
+    <span class="tag">无账号</span>
+    <span class="tag">无后端</span>
+  </div>
+
+  <div class="foot">
+    与任何第三方游戏平台无隶属、无授权关系；界面与素材均为原创生成，不含任何第三方商标或素材。<br />
+    打开即玩，进度保存在浏览器本地，随时可清空。
+  </div>
+</div>
+</body>
+</html>
