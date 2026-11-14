@@ -34,7 +34,11 @@ export function emptyState() {
     version: 3,
     library: {},    // { gameId: { gameId, status, ownedAt, installedAt, progress, favorite, lastLaunchedAt, launchCount } }
     downloads: [],  // [{ id, gameId, stage, resumeStage, progress, paused, stageElapsedMs, stageDurationMs, totalElapsedMs, queuedAt, startedAt, completedAt, speedMBps, etaSec }]
-    settings: { reducedMotion: false, soundEnabled: true, notificationsEnabled: true, defaultRoute: '#/store' },
+    settings: {
+      reducedMotion: false, soundEnabled: true, notificationsEnabled: true, defaultRoute: '#/store',
+      // 分级（批次 6）：只存本机判定，不采集生日、不上传
+      showAdult: true, adultGate: 'unset', adultGateAt: null,
+    },
     profile: {
       welcomeSeen: false, revealSeen: false, firstRevealGameId: null, ownerType: null,
       badges: [],   // [{ badgeId, unlockedAt }]
@@ -168,6 +172,15 @@ function normalize(input) {
     if (typeof s.soundEnabled === 'boolean') out.settings.soundEnabled = s.soundEnabled;
     if (typeof s.notificationsEnabled === 'boolean') out.settings.notificationsEnabled = s.notificationsEnabled;
     if (isRoute(s.defaultRoute)) out.settings.defaultRoute = s.defaultRoute;
+    if (typeof s.showAdult === 'boolean') out.settings.showAdult = s.showAdult;
+    if (s.adultGate === 'passed' || s.adultGate === 'declined' || s.adultGate === 'unset') {
+      out.settings.adultGate = s.adultGate;
+    }
+    if (typeof s.adultGateAt === 'number' && Number.isFinite(s.adultGateAt) && s.adultGateAt > 0) {
+      out.settings.adultGateAt = s.adultGateAt;
+    }
+    // 非法组合（已拒绝却仍显示成人内容）强制回落
+    if (out.settings.adultGate === 'declined') out.settings.showAdult = false;
   }
 
   // profile
@@ -306,6 +319,9 @@ export function updateSettings(patch) {
     if (patch.defaultRoute !== undefined) {
       next.defaultRoute = isRoute(patch.defaultRoute) ? patch.defaultRoute : '#/store';
     }
+    if (typeof patch.showAdult === 'boolean') next.showAdult = patch.showAdult;
+    if (patch.adultGate === 'passed' || patch.adultGate === 'declined') next.adultGate = patch.adultGate;
+    if (next.adultGate === 'declined') next.showAdult = false;
     return { ...s, settings: next };
   });
   return getState().settings;
@@ -374,6 +390,40 @@ export function giftTotalFor(gameId) {
   return getState().gifts
     .filter(g => g.gameId === gameId)
     .reduce((sum, g) => sum + g.amount, 0);
+}
+
+// 分级（批次 6）：是否已通过年龄门
+export function isAdultAllowed() {
+  return getState().settings.adultGate === 'passed';
+}
+
+// 年龄门判定：passed → 通过并恢复显示；declined → 通过并隐藏成人条目
+export function setAdultGate(status) {
+  if (status !== 'passed' && status !== 'declined') return { ok: false, reason: '非法状态' };
+  dispatch(s => ({
+    ...s,
+    settings: {
+      ...s.settings,
+      adultGate: status,
+      adultGateAt: Date.now(),
+      showAdult: status === 'passed',
+    },
+    events: pushEvent(s.events, status === 'passed' ? 'adult_gate_pass' : 'adult_gate_decline', null, null),
+  }));
+  return { ok: true, adultGate: status };
+}
+
+// 成人内容开关（仅控制商店是否显示，不等于通过年龄门）
+export function setShowAdult(on) {
+  const value = !!on;
+  if (getState().settings.showAdult === value) return { ok: true };
+  if (value && !isAdultAllowed()) return { ok: false, reason: '需要先通过年龄确认' };
+  dispatch(s => ({
+    ...s,
+    settings: { ...s.settings, showAdult: value },
+    events: pushEvent(s.events, 'adult_toggle', null, { showAdult: value }),
+  }));
+  return { ok: true };
 }
 
 // 问卷提交（§3.8）：Q1(1-5) 必填、Q2 必填单选、Q3 选填（字符串≤200，允许空）；失败不改状态

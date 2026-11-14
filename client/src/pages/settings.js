@@ -4,7 +4,8 @@
 //   数据：导出本地数据（exportLocalData）+ 清除本地数据（§8.4 模态确认弹窗 → resetAllData + reload）
 'use strict';
 import { showToast } from '../shell.js';
-import { resetAllData, exportLocalData, getState, subscribe, updateSettings, STORAGE_KEY, APP_VERSION } from '../state/store.js';
+import { resetAllData, exportLocalData, getState, subscribe, updateSettings, setShowAdult, STORAGE_KEY, APP_VERSION } from '../state/store.js';
+import { openAdultGateDialog } from '../flow/dialogs.js';
 
 export function renderSettings(view) {
   const nw = window.nwApp || {};
@@ -46,6 +47,14 @@ export function renderSettings(view) {
               <option value="#/store">商店</option>
               <option value="#/library">游戏库</option>
             </select>
+          </div>
+          <div class="setpage__row setpage__row--adult">
+            <span class="setpage__row-label">成人内容（18+）</span>
+            <span class="setpage__row-value" id="set-adult-state">—</span>
+            <button class="btn btn--ghost btn--sm" id="set-adult-verify">验证</button>
+          </div>
+          <div class="setpage__row setpage__row--note">
+            <span class="setpage__row-label">仅本机记录，不采集生日，不上传任何信息。未满 18 岁将隐藏成人条目。</span>
           </div>
         </div>
         <div class="setpage__subtitle">数据</div>
@@ -105,6 +114,22 @@ export function renderSettings(view) {
     showToast('默认启动页面已更新');
   });
 
+  /* ---- 成人内容行（批次 6）：三态显示 + 重新确认 ---- */
+  const adultState = view.querySelector('#set-adult-state');
+  const adultBtn = view.querySelector('#set-adult-verify');
+  const ADULT_TEXT = { unset: '未确认', passed: '已通过', declined: '已限制（未满 18）' };
+  function paintAdult() {
+    const s = getState().settings;
+    if (adultState) adultState.textContent = ADULT_TEXT[s.adultGate] || '未确认';
+    if (adultBtn) adultBtn.textContent = s.adultGate === 'passed' ? '重新确认' : '验证';
+  }
+  paintAdult();
+  adultBtn?.addEventListener('click', () => {
+    openAdultGateDialog(null,
+      () => { paintAdult(); setShowAdult(true); showToast('已确认成年 · 成人条目恢复显示'); },
+      () => { paintAdult(); showToast('已按未满 18 岁处理'); });
+  });
+
   // 导出本地数据（§10.4）：仅用户主动点击触发
   view.querySelector('#export-data')?.addEventListener('click', () => {
     try {
@@ -125,6 +150,7 @@ export function renderSettings(view) {
   const unsubscribe = subscribe(() => {
     const label = view.querySelector('[data-lib-count]');
     if (label) label.textContent = libCountText();
+    paintAdult();
   });
   const libLabel = view.querySelector('[data-lib-count]');
   if (libLabel) libLabel.textContent = libCountText();

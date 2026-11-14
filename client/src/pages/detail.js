@@ -4,16 +4,36 @@
 'use strict';
 import { GAME_MAP } from '../data/games.js';
 import { fmtSize, artImg } from '../utils.js';
-import { getState, subscribe } from '../state/store.js';
+import { getState, subscribe, isAdultAllowed } from '../state/store.js';
 import { setSelectedGame } from '../state/ui.js';
 import { startDownload } from '../state/download-engine.js';
-import { openInstallDialog, openGiftDialog } from '../flow/dialogs.js';
+import { openInstallDialog, openGiftDialog, openAdultGateDialog } from '../flow/dialogs.js';
 import { startLaunchFlow, launchDestination } from '../flow/launch.js';
 
 export function renderDetail(view, params) {
   const id = params && params[0];
   const g = id && GAME_MAP[id];
   if (!g) { location.hash = '#/store'; return {}; }
+
+  // 分级拦截（批次 6）：未通过年龄确认时只渲染受限占位页，不出现截图/简介/获取入口
+  if (g.isAdult === true && !isAdultAllowed()) {
+    view.innerHTML = `
+      <div class="gatepage">
+        <span class="gatepage__badge">18+</span>
+        <h2 class="gatepage__name">${g.name}</h2>
+        <p class="gatepage__meta">需要年龄确认 · 本作含成人题材</p>
+        <p class="gatepage__hint">确认年满 18 岁后才会显示截图、简介与获取入口。本客户端不提供任何露骨内容。</p>
+        <button class="btn btn--primary" id="gate-open">进行年龄确认</button>
+        <button class="btn btn--ghost" id="gate-back">返回商店</button>
+      </div>`;
+    const ask = () => openAdultGateDialog(g,
+      () => { renderDetail(view, params); },                       // 通过 → 就地重渲染真实详情
+      () => { location.hash = '#/store'; });                        // 拒绝 → 回商店
+    view.querySelector('#gate-open')?.addEventListener('click', ask);
+    view.querySelector('#gate-back')?.addEventListener('click', () => { location.hash = '#/store'; });
+    ask();                                                          // 深链接直访直接弹门
+    return {};
+  }
 
   view.innerHTML = `
     <div class="storedetail">

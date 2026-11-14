@@ -13,7 +13,7 @@ import { GAME_MAP } from './data/games.js';
 import { BADGES } from './data/badges.js';
 import { initShell, showToast } from './shell.js';
 import { playComplete } from './sound.js';
-import { initInstallDialog, initProfileCard, initAboutDialog, initGiftDialog, initBadgeDialog, setGiftSentHandler } from './flow/dialogs.js';
+import { initInstallDialog, initProfileCard, initAboutDialog, initGiftDialog, initBadgeDialog, initAdultGateDialog, setGiftSentHandler } from './flow/dialogs.js';
 
 // 调试暴露（供自动化验收读取状态，不影响生产逻辑）
 window.__debug = { getState };
@@ -123,5 +123,6 @@ initProfileCard();
 initAboutDialog();
 initGiftDialog();
 initBadgeDialog();
+initAdultGateDialog();
 // 送礼成功提示由入口统一提供，dialogs 不反向依赖壳层
 setGiftSentHandler((game, amount) => { try { showToast(`已向《${game.name}》送出 ${amount} 心意`); } catch (e) { /* 静默 */ } });

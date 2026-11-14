@@ -1,6 +1,6 @@
 // 通用弹窗：安装确认（§5.3）与本地个人卡（§8.1）
 'use strict';
-import { getState, APP_VERSION, sendGift, refillWallet, GIFT_TIERS, WALLET_START } from '../state/store.js';
+import { getState, APP_VERSION, sendGift, refillWallet, GIFT_TIERS, WALLET_START, setAdultGate } from '../state/store.js';
 import { fmtSize, fmtLaunchDate } from '../utils.js';
 import { BADGES } from '../data/badges.js';
 
@@ -228,4 +228,87 @@ export function initBadgeDialog() {
   if (!root) return;
   document.getElementById('badge-close')?.addEventListener('click', () => setOpen('badge-dialog', false));
   root.addEventListener('click', (e) => { if (e.target === root) setOpen('badge-dialog', false); });
+}
+
+/* ================= 年龄确认弹窗（批次 6：分级演示） ================= */
+
+let gateGame = null;
+let gateOnPass = null;
+let gateOnDecline = null;
+
+function gateName() {
+  return gateGame ? `《${gateGame.name}》` : '这款作品';
+}
+
+function paintGateAsk() {
+  const title = document.getElementById('adult-gate-title');
+  const body = document.getElementById('adult-gate-body');
+  const actions = document.getElementById('adult-gate-actions');
+  if (!body || !actions) return;
+  if (title) title.textContent = '年龄确认';
+  body.innerHTML = `
+    <p>${gateName()}是一部 <b>18+ 虚构作品</b>：成人向恋爱悬疑题材，含成人情感关系描写。</p>
+    <p>本客户端不提供任何露骨内容，此页仅用于演示分级与年龄门。</p>
+    <p>请确认你已年满 18 岁。</p>`;
+  actions.innerHTML = `
+    <button class="btn btn--primary" id="gate-no">我还未满 18 岁</button>
+    <button class="btn" id="gate-yes">我已满 18 岁</button>`;
+  // 安全默认：焦点落在「未满 18」，避免误按回车直接放行
+  actions.querySelector('#gate-no').addEventListener('click', () => {
+    setAdultGate('declined');
+    paintGateDeclined();
+  });
+  actions.querySelector('#gate-yes').addEventListener('click', () => {
+    setAdultGate('passed');
+    const cb = gateOnPass;
+    closeAdultGate();
+    if (cb) cb();
+  });
+}
+
+function paintGateDeclined() {
+  const title = document.getElementById('adult-gate-title');
+  const body = document.getElementById('adult-gate-body');
+  const actions = document.getElementById('adult-gate-actions');
+  if (!body || !actions) return;
+  if (title) title.textContent = '已按未满 18 岁处理';
+  body.innerHTML = `
+    <p>${gateName()}的封面、截图与获取入口将不再显示，也不会进入你的下载队列。</p>
+    <p>这不是永久记录：你可以在「设置 → 体验 → 成人内容」里重新确认。</p>
+    <p>其余作品不受影响。</p>`;
+  actions.innerHTML = '<button class="btn btn--primary" id="gate-ok">知道了</button>';
+  actions.querySelector('#gate-ok').addEventListener('click', () => {
+    const cb = gateOnDecline;
+    closeAdultGate();
+    if (cb) cb();
+  });
+  actions.querySelector('#gate-ok').focus();
+}
+
+export function openAdultGateDialog(game, onPass, onDecline) {
+  if (!document.getElementById('adult-gate-body')) return;
+  gateGame = game || null;
+  gateOnPass = typeof onPass === 'function' ? onPass : null;
+  gateOnDecline = typeof onDecline === 'function' ? onDecline : null;
+  paintGateAsk();
+  setOpen('adult-gate', true);
+  // 必须在 hidden 移除之后再聚焦：隐藏元素无法获得焦点
+  document.getElementById('gate-no')?.focus();
+}
+
+export function closeAdultGate() {
+  gateGame = null;
+  gateOnPass = null;
+  gateOnDecline = null;
+  setOpen('adult-gate', false);
+}
+
+export function initAdultGateDialog() {
+  const root = document.getElementById('adult-gate');
+  if (!root) return;
+  // 遮罩 / Esc 关闭 = 未表态：不写任何状态，下次照常询问
+  root.addEventListener('click', (e) => { if (e.target === root) closeAdultGate(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && root && !root.hidden) closeAdultGate();
+  });
 }

@@ -1318,3 +1318,44 @@ img[data-fb] { display: block; }
 
 /* hidden 必须真的隐藏（.card 自带 display:flex） */
 .card[hidden] { display: none !important; }
+
+/* ============================================================
+   批次 6：18+ 分级（卡片角标 / 受限占位页 / 年龄门弹窗 / 设置行）
+   ============================================================ */
+
+/* 卡片左上角分级角标：文字标签，不只靠颜色 */
+.card__adult {
+  position: absolute; right: 8px; bottom: 8px; z-index: 2;
+  padding: 2px 6px; border-radius: 3px;
+  background: rgba(0, 0, 0, .72); border: 1px solid rgba(255, 255, 255, .35);
+  color: #fff; font-size: 10.5px; font-weight: 700; letter-spacing: .5px;
+}
+
+/* 受限占位页：只给名字、类型与一个按钮，不放任何截图或简介 */
+.gatepage {
+  max-width: 520px; margin: 48px auto; padding: 34px 30px; text-align: center;
+  border: 1px solid var(--line); border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, .03);
+}
+.gatepage__badge {
+  display: inline-block; padding: 3px 10px; border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, .35); color: #fff;
+  font-size: 12px; font-weight: 700; letter-spacing: 1px;
+}
+.gatepage__name { margin: 16px 0 6px; font-size: 26px; color: var(--ink); }
+.gatepage__meta { color: var(--ink-3); font-size: 12.5px; }
+.gatepage__hint { margin: 14px 0 22px; color: var(--ink-2); font-size: 13px; line-height: 1.7; }
+.gatepage .btn { margin: 0 5px; }
+
+/* 年龄门弹窗：正文左对齐，按钮两个并排 */
+.adultgate { max-width: 460px; }
+.adultgate .dialog__body p { margin: 0 0 10px; font-size: 13px; line-height: 1.75; color: var(--ink-2); }
+.adultgate .dialog__body p:last-child { margin-bottom: 0; }
+.adultgate .dialog__body b { color: var(--ink); }
+
+/* 设置页：成人内容行与脚注行 */
+.setpage__row--adult { gap: 12px; }
+.setpage__row--note {
+  color: var(--ink-3); font-size: 11.5px; line-height: 1.6;
+  border-bottom: none;
+}

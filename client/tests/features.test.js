@@ -164,3 +164,46 @@ test('钱包与礼物的脏数据降级：负数余额归零、非法面额礼�
   assert.equal(out.gifts.length, 1);
   assert.equal(out.gifts[0].gameId, 'a');
 });
+
+/* ================= 分级（18+ 年龄门）状态 ================= */
+
+test('分级默认值：未确认、显示成人条目、无判定时间', () => {
+  reset();
+  const s = getState().settings;
+  assert.equal(s.adultGate, 'unset');
+  assert.equal(s.showAdult, true);
+  assert.equal(s.adultGateAt, null);
+});
+
+test('setAdultGate：通过则恢复显示并记事件；拒绝则隐藏且不允许直接打开开关', () => {
+  reset();
+  assert.deepEqual(store.setAdultGate('passed'), { ok: true, adultGate: 'passed' });
+  let s = getState();
+  assert.equal(s.settings.showAdult, true);
+  assert.ok(s.settings.adultGateAt > 0);
+  assert.equal(s.events.filter(e => e.event === 'adult_gate_pass').length, 1);
+
+  store.setAdultGate('declined');
+  s = getState();
+  assert.equal(s.settings.adultGate, 'declined');
+  assert.equal(s.settings.showAdult, false);
+  assert.equal(s.events.filter(e => e.event === 'adult_gate_decline').length, 1);
+
+  // 已拒绝时不能把开关打回 true（必须先重新过门）
+  assert.equal(store.setShowAdult(true).ok, false);
+  assert.equal(getState().settings.showAdult, false);
+});
+
+test('setAdultGate 非法入参被拒绝且不改状态', () => {
+  reset();
+  assert.equal(store.setAdultGate('yes').ok, false);
+  assert.equal(getState().settings.adultGate, 'unset');
+});
+
+test('normalize：非法 adultGate 回落 unset；declined 与 showAdult 的非法组合被强制修正', () => {
+  const bad = store.normalize({ version: 3, settings: { adultGate: 'yes', showAdult: true } });
+  assert.equal(bad.settings.adultGate, 'unset');
+  const conflict = store.normalize({ version: 3, settings: { adultGate: 'declined', showAdult: true } });
+  assert.equal(conflict.settings.adultGate, 'declined');
+  assert.equal(conflict.settings.showAdult, false, '已拒绝却仍显示 → 必须回落为隐藏');
+});

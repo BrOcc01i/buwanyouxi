@@ -3,8 +3,9 @@
 import { GAMES, pickFeatured } from '../data/games.js';
 import { CATEGORIES } from '../data/categories.js';
 import { fmtSize, artImg } from '../utils.js';
-import { getState, subscribe } from '../state/store.js';
+import { getState, subscribe, isAdultAllowed } from '../state/store.js';
 import { getStoreCategory, setStoreCategory, subscribeStoreCategory } from '../state/ui.js';
+import { openAdultGateDialog } from '../flow/dialogs.js';
 
 export function renderStore(view) {
   const featured = pickFeatured(GAMES);
@@ -53,6 +54,7 @@ export function renderStore(view) {
     card.innerHTML = `
       <div class="card__cover" style="background:linear-gradient(135deg, ${g.gradient.join(',')})">
         ${artImg(g, 'portrait', 'card__img', g.name)}
+        ${g.isAdult === true ? '<span class="card__adult">18+</span>' : ''}
         <span class="card__rating">&#9733; ${g.rating.toFixed(1)}</span>
         <span class="card__size">${fmtSize(g.sizeMB)}</span>
         <span class="card__status"></span>
@@ -62,13 +64,20 @@ export function renderStore(view) {
         <div class="card__hook">${g.hook}</div>
         <div class="card__tags">${g.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
       </div>`;
-    card.addEventListener('click', () => { location.hash = '#/detail/' + g.id; });
+    card.addEventListener('click', () => {
+      if (g.isAdult === true && !isAdultAllowed()) {
+        openAdultGateDialog(g, () => { location.hash = '#/detail/' + g.id; });
+        return;
+      }
+      location.hash = '#/detail/' + g.id;
+    });
     grid.appendChild(card);
     statusRefs.set(g.id, card.querySelector('.card__status'));
   });
 
   /* ---- 分类 chips：计数随「分类 + 搜索」实时算，避免点进空页 ---- */
   function matches(g, cat, q) {
+    if (g.isAdult === true && !getState().settings.showAdult) return false;   // 已关闭显示 → 全目录隐藏
     if (cat !== 'all' && g.category !== cat) return false;
     if (!q) return true;
     return g.name.toLowerCase().includes(q)
@@ -111,7 +120,7 @@ export function renderStore(view) {
   }
 
   // 状态徽标随 store 订阅刷新（只写文本/类名，不碰 hidden）
-  const unsubscribeStatus = subscribe(updateStatus);
+  const unsubscribeStatus = subscribe(() => { updateStatus(); applyFilter(); });
   function updateStatus() {
     const state = getState();
     GAMES.forEach(g => {
