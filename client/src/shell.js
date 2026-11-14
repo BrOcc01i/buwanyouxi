@@ -162,15 +162,11 @@ export function initShell() {
     li.title = g.hook;
     if (lib && lib.status === 'downloading') li.classList.add('rail__item--dl');
     else if (!lib) li.classList.add('rail__item--dim');
-    // C1（截图 2）：下载中的条目名后缀「 - N%」
-    const name = (lib && lib.status === 'downloading')
-      ? `${g.name} - ${dlPct(lib.progress)}%`
-      : g.name;
+    // 侧栏只做「在不在下载」的状态提示，不显示百分比与进度条（进度统一看下载页与底部状态栏）
     li.innerHTML = `
       <span class="rail__swatch" style="background:linear-gradient(135deg, ${g.gradient.join(',')})">${artImg(g, 'icon', 'rail__swatch-img', g.name)}</span>
       <span class="rail__itembody">
-        <span class="rail__name">${name}</span>
-        ${lib && lib.status === 'downloading' ? `<span class="rail__mini"><span class="rail__minifill" style="width:${dlPct(lib.progress)}%"></span></span>` : ''}
+        <span class="rail__name">${g.name}</span>
       </span>`;
     li.addEventListener('click', () => {
       setSelectedGame(g.id);
@@ -208,19 +204,6 @@ export function initShell() {
       el.classList.toggle('rail__item--active', el.dataset.gameId === sel);
     });
     homeBtn?.classList.toggle('rail__home--active', !sel);
-  }
-
-  // 下载中：仅更新 mini 进度条宽度与名称后缀（不重建列表）
-  function updateMini(state) {
-    document.querySelectorAll('.rail__item--dl').forEach(el => {
-      const lib = state.library[el.dataset.gameId];
-      const fill = el.querySelector('.rail__minifill');
-      if (!lib) return;
-      if (fill) fill.style.width = dlPct(lib.progress) + '%';
-      const nameEl = el.querySelector('.rail__name');
-      const g = GAME_MAP[el.dataset.gameId];
-      if (nameEl && g) nameEl.textContent = `${g.name} - ${dlPct(lib.progress)}%`;
-    });
   }
 
   /* ---- 状态栏下载 mini（C1 截图 2：图标 + 名称 + 进度条 + %） ---- */
@@ -271,8 +254,6 @@ export function initShell() {
     if (struct !== lastStruct) {
       lastStruct = struct;
       renderList(state);
-    } else {
-      updateMini(state);
     }
     renderMini(state);
   }

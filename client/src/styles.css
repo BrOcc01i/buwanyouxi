@@ -412,8 +412,6 @@ button, a { font-family: inherit; }
 }
 .rail__itembody { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .rail__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.rail__mini { height: 3px; background: rgba(255, 255, 255, .12); border-radius: 2px; overflow: hidden; }
-.rail__minifill { display: block; height: 100%; background: linear-gradient(90deg, #5ba31b, #8cc62a); }
 
 /* ---- 库主页（横幅 + 最近游戏） ---- */
 .libhome { animation: pageIn .18s ease-out; }
