@@ -4,6 +4,7 @@ node_modules/
 # 构建产物
 client/dist/
 client/release/
+client/release-new/
 
 # 旧版本打包产物隔离目录（555MB，保留本地、严禁入库）
 client/release-old-*/

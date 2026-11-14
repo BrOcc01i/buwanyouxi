@@ -666,3 +666,44 @@ npm run build ✅（素材经 vite:asset 管线入 dist，js 95.57 kB / css 38.7
 ## 判定
 **CONCERNS** —— 质量门与真机验收全项 PASS；阻塞公开发布的仅剩：CI 从未远端运行、
 安装包未与提交绑定（建议重打并刷新 SHA-256）、Steam 相关表述自查。
+
+---
+
+# v1.0.0 产物重打（2026-11-14）
+
+## 变更
+- `package.json` 增加根级 `"productName": "不玩游戏"`（此前仅有 `build.productName`）
+- 重打产物，刷新 SHA-256
+
+## 效果实测
+| 项 | 重打前 | 重打后 |
+|---|---|---|
+| 安装目录 | `%LOCALAPPDATA%\Programs\bu-wanyouxi-client` | 同左（NSIS 取 `name`，未变） |
+| 用户数据目录 | `%APPDATA%\bu-wanyouxi-client` | **`%APPDATA%\不玩游戏`**（productName 生效） |
+| exe 版本信息 | — | FileVersion 1.0.0 / ProductName 不玩游戏 / FileDescription 不玩游戏 |
+| Setup 体积 | 108,287,473 | 108,204,532 |
+| Portable 体积 | 108,059,756 | 107,976,818 |
+
+## 新产物
+| 文件 | 字节数 | SHA-256 |
+|---|---|---|
+| 不玩游戏 Setup 1.0.0.exe | 108,204,532 | 2d28c732a68ca2d8081722a8f7a5f7fd6fafb1552e0dffbe48315dec97712038 |
+| 不玩游戏-Portable-1.0.0.exe | 107,976,818 | c337d9137a877548a05801cd730a0cedf0763000b16f89bfb70513a9f46461e2 |
+
+## 复验
+- [x] 安装 `/S`：退出码 0，10.3s
+- [x] 安装版启动：0.5s 出窗，4 进程；关闭后 0 进程
+- [x] 数据目录：`%APPDATA%\不玩游戏` 写入时刻与启动/关闭时刻一致；旧目录 `bu-wanyouxi-client` 不再变动
+- [x] 卸载 `/S`：4.3s 清空；进程 0 / 注册表 0 / 快捷方式 0
+- [x] 便携版：3.5s 出窗，关闭后 0 进程、临时目录残留 0
+- [x] `npm test` 50/50；`npm run build` PASS（1.15s）
+
+## 构建环境坑（复现必读）
+1. **代理**：`HTTP(S)_PROXY=127.0.0.1:1583` 对 electron-builder 的部分下载返回 502 / 600s 超时；
+   打包时 `unset` 代理变量可直连成功。
+2. **winCodeSign 缓存缺失**：需手工放入 `%LOCALAPPDATA%\electron-builder\Cache\winCodeSign\winCodeSign-2.6.0`
+   （来源 `https://npmmirror.com/mirrors/electron-builder-binaries/winCodeSign-2.6.0/winCodeSign-2.6.0.7z`，
+   SHA-256 必须等于 `cdaec7154dda7cc31f88d886e2489379a0625a737d610b5ae7f62a12f16743a4`）。
+3. **工作区 E: 上打包会 EBUSY**：`release\win-unpacked\resources\app.asar` 与 `.tmp` 目录报 busy/locked，
+   无法重命名目录；改为 `-c.directories.output=<系统盘临时目录>` 打包成功后，再把 exe 复制回 `client/release/`。
+4. 旧 `release/win-unpacked` 仍是 2026-09-19 版本（文件被锁无法覆盖），**不作为本次验收对象**；验收对象为两个 exe。

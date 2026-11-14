@@ -21,9 +21,9 @@
 
 - [x] 打包前确认 `client/release/` 已清空（2026-09-03 旧产物已隔离至 `client/release-old-*/`）
 - [x] `npm run dist` 产出安装版（nsis）+ 便携版（portable）到 `client/release/`
-- [x] 产物可用版本号（1.0.0）、生成时间（2026-09-19 14:26）与 SHA-256 追溯
-- [x] 安装版本机安装 → 启动 → 卸载验证通过（静默安装 7.9s，启动 0.5s 出窗，卸载 3.6s 清空）
-- [x] 便携版本机解压启动验证通过（2.5s 出窗，关闭后无解压残留）
+- [x] 产物可用版本号（1.0.0）、生成时间（2026-11-14 09:36）与 SHA-256 追溯
+- [x] 安装版本机安装 → 启动 → 卸载验证通过（静默安装 10.3s，启动 0.5s 出窗，卸载 4.3s 清空）
+- [x] 便携版本机解压启动验证通过（3.5s 出窗，关闭后无解压残留）
 - [ ] 安装包不含 dev 依赖、不含 dist 之外的多余文件（未做 asar 逐项审计，仅体积旁证：app.asar 4.70 MB）
 - [x] **真机强制验收（打包完成后）：标题栏 ✕ 关闭、设置页/游戏菜单「退出」、IPC 退出链路全部走通**
 
@@ -54,23 +54,24 @@
 
 ---
 
-## 关卡 B 实测矩阵（2026-11-13）
+## 关卡 B 实测矩阵（2026-11-14 重打后）
 
-**基线**：分支 `main` ｜ 提交 `4901112` ｜ tag `v1.0.0` ｜ 198 文件 / 15,556 行插入 ｜ 工作区干净
+**基线**：分支 `main` ｜ tag `v1.0.0` ｜ 198 文件 / 15,556 行插入 ｜ 工作区干净
 
 | 用例 | 方法 | 实测结果 | 判定 |
 |---|---|---|---|
-| 生产构建 | `npm run build` | `✓ built in 1.86s`，入口 js 99.03 kB（gzip 33.54） | PASS |
+| 生产构建 | `npm run build` | `✓ built in 1.15s`，入口 js 99.03 kB（gzip 33.54） | PASS |
 | 逻辑测试 | `npm test` | tests 50 / pass 50 / fail 0 / skipped 0 | PASS |
-| 视觉回归 | `npm run visual:compare` | 26/26 ✅，`compare: 全部一致`，EXIT=0，端口归零（TIME_WAIT=26 内核自然消退） | PASS |
-| 打包版启动 | `release/win-unpacked/不玩游戏.exe` | 4 进程，主窗口标题「不玩游戏」，0.5s 出窗 | PASS |
+| 视觉回归 | `npm run visual:compare` | 26/26 ✅，`compare: 全部一致`，EXIT=0，端口归零（TIME_WAIT 由内核自然消退） | PASS |
+| 打包 | `electron-builder --win` | 35s 完成，Setup + Portable 双产物 | PASS |
+| 打包版启动 | `win-unpacked/不玩游戏.exe` | 4 进程，主窗口标题「不玩游戏」，0.5s 出窗 | PASS |
 | 优雅关闭 | `CloseMainWindow()` → WM_CLOSE | 进程 4 → 0，耗时 ≤0.5s | PASS |
-| 状态落盘 | leveldb 检查 | `%APPDATA%\bu-wanyouxi-client\Local Storage\leveldb`，42 文件，`nw_client_state_v1` 命中 | PASS |
-| 安装版安装 | `Setup 1.0.0.exe /S` | 退出码 0，7.9s，落位 `%LOCALAPPDATA%\Programs\bu-wanyouxi-client` | PASS |
-| 安装版启动/关闭 | 安装目录 exe | 0.5s 出窗，4 进程 → 0 | PASS |
-| 安装版卸载 | `Uninstall 不玩游戏.exe /S` | 3.6s 目录清空；进程 0 / 注册表 0 / 快捷方式 0 | PASS |
-| 便携版启动/关闭 | `不玩游戏-Portable-1.0.0.exe` | 2.5s 出窗（自解压），关闭后进程 0、临时目录残留 0 | PASS |
-| SHA-256 | `certutil -hashfile` | Setup `2422a83c…314c7c`｜Portable `116229ac…8b9e8` | PASS |
+| 状态落盘 | leveldb 检查 | `%APPDATA%\不玩游戏\Local Storage\leveldb`，`nw_client_state_v1` 命中，写入时刻与关闭时刻一致 | PASS |
+| 安装版安装 | `Setup 1.0.0.exe /S` | 退出码 0，10.3s，落位 `%LOCALAPPDATA%\Programs\bu-wanyouxi-client` | PASS |
+| 安装版启动/关闭 | 安装目录 exe | 0.5s 出窗，4 进程 → 0；FileVersion 1.0.0 / ProductName 不玩游戏 | PASS |
+| 安装版卸载 | `Uninstall 不玩游戏.exe /S` | 4.3s 目录清空；进程 0 / 注册表 0 / 快捷方式 0 | PASS |
+| 便携版启动/关闭 | `不玩游戏-Portable-1.0.0.exe` | 3.5s 出窗（自解压），关闭后进程 0、临时目录残留 0 | PASS |
+| SHA-256 | `certutil -hashfile` | Setup `2d28c732…2038`｜Portable `c337d913…1e2` | PASS |
 
 ### 环境注意（非产品缺陷）
 
@@ -81,9 +82,12 @@
 
 ### 已知问题（均为 P2，不阻塞发布但需在 Release 说明或后续版本处理）
 
-1. **安装目录与用户数据目录使用英文包名**：`%LOCALAPPDATA%\Programs\bu-wanyouxi-client`、`%APPDATA%\bu-wanyouxi-client`，
-   而显示名为「不玩游戏」。根因：`package.json` 缺根级 `productName`。
-2. **卸载后保留用户数据**：卸载清空程序目录与注册表，但 `%APPDATA%\bu-wanyouxi-client` 保留（Electron 默认行为），
+1. **安装目录仍用英文包名**：`%LOCALAPPDATA%\Programs\bu-wanyouxi-client`（exe 与版本信息已是「不玩游戏」）。
+   加根级 `productName` 已修复 userData 目录（现为 `%APPDATA%\不玩游戏`），但 NSIS 安装目录仍取 `package.json` 的 `name`；
+   若要改需自定义 NSIS 脚本，属后续版本范围。
+2. **userData 路径变更导致旧数据不迁移**：本次 `productName` 生效后，数据目录由 `%APPDATA%\bu-wanyouxi-client`
+   迁到 `%APPDATA%\不玩游戏`，旧目录数据不会被读取。首版无外部用户，影响仅限本机验收数据；后续若再改路径需补迁移逻辑。
+3. **卸载后保留用户数据**：卸载清空程序目录与注册表，但 `%APPDATA%\不玩游戏` 保留（Electron 默认行为），
    与「清除数据一键彻底删除」的产品承诺存在口径差，建议在 PRIVACY/README 明示。
-3. **安装包与提交未绑定**：现有 exe 生成于 2026-09-19，早于本次提交 `4901112`；
-   源码（09-05）早于产物（09-19）故内容一致，但未重新打包，发布前建议重打一次并刷新 SHA-256。
+4. **产物与提交无签名绑定**：产物已于 2026-11-14 09:36 基于当前工作区重打并刷新 SHA-256，
+   但未做代码签名，无法从 exe 反证对应提交；发布说明中应以 SHA-256 为准。

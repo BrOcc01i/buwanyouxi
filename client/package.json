@@ -1,5 +1,6 @@
 {
   "name": "bu-wanyouxi-client",
+  "productName": "不玩游戏",
   "version": "1.0.0",
   "description": "不玩游戏 — Steam 启发式桌面客户端（Electron + Vite，原生 JS）",
   "private": true,

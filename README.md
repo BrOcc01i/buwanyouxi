@@ -60,8 +60,8 @@ npm run dist       # electron-builder 打包 Windows 安装版 + 便携版（rel
 
 | 文件 | 字节数 | SHA-256 |
 |---|---|---|
-| `不玩游戏 Setup 1.0.0.exe` | 108,287,473 | `2422a83c7f2ad1da898e83b4729671f5d2d09641e824eae8f9b493f523314c7c` |
-| `不玩游戏-Portable-1.0.0.exe` | 108,059,756 | `116229acf3cb5c207caf868d2d4938944524b52a855b85886cb682671c28b9e8` |
+| `不玩游戏 Setup 1.0.0.exe` | 108,204,532 | `2d28c732a68ca2d8081722a8f7a5f7fd6fafb1552e0dffbe48315dec97712038` |
+| `不玩游戏-Portable-1.0.0.exe` | 107,976,818 | `c337d9137a877548a05801cd730a0cedf0763000b16f89bfb70513a9f46461e2` |
 
 校验方法（Windows 命令行）：
 
