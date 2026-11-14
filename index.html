@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>不玩游戏</title>
+  <link rel="icon" type="image/png" href="./assets/icon-PX4oLOqe.png" />
+  <script type="module" crossorigin src="./assets/index-BycDWeQ6.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-C9HmP-E4.css">
+</head>
+<body>
+  <div id="app" class="app">
+    <!-- 顶部标题栏（自定义窗口控制，frameless） -->
+    <header class="titlebar">
+      <div class="titlebar__brand">
+        <span class="brand__logo brand__logo--sm">不</span>
+        <span class="titlebar__brandname">不玩游戏</span>
+      </div>
+      <nav class="titlebar__menus" aria-label="应用菜单">
+        <div class="tmenu-wrap">
+          <span class="tmenu tmenu--btn" id="menu-view" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false">查看</span>
+          <div class="tmenu__dropdown" id="menu-view-dd" role="menu" aria-labelledby="menu-view" hidden>
+            <button class="tmenu__item" role="menuitem" data-nav="#/library">库首页</button>
+            <button class="tmenu__item" role="menuitem" data-nav="#/downloads">下载管理</button>
+            <button class="tmenu__item" role="menuitem" data-nav="#/settings">设置</button>
+          </div>
+        </div>
+        <span class="tmenu tmenu--disabled" id="menu-friends" aria-disabled="true" title="离线体验不可用">好友</span>
+        <div class="tmenu-wrap">
+          <span class="tmenu tmenu--btn" id="menu-game" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false">游戏</span>
+          <div class="tmenu__dropdown" id="menu-game-dd" role="menu" aria-labelledby="menu-game" hidden>
+            <button class="tmenu__item" role="menuitem" data-nav="#/store">商店</button>
+            <button class="tmenu__item" role="menuitem" data-nav="#/library">游戏库</button>
+            <button class="tmenu__item tmenu__item--quit" role="menuitem" id="menu-quit">退出</button>
+          </div>
+        </div>
+        <span class="tmenu tmenu--btn" id="menu-help" role="button" tabindex="0">帮助</span>
+      </nav>
+      <div class="titlebar__spacer"></div>
+      <div class="titlebar__user" id="user-area" title="本地访客 · 无账号体系">
+        <span class="user__avatar">客</span>
+        <span class="titlebar__username">本地访客 ▾</span>
+      </div>
+      <div class="win-controls">
+        <button class="win-btn" id="win-min" aria-label="最小化">&#x2500;</button>
+        <button class="win-btn" id="win-max" aria-label="最大化/还原">&#x25A1;</button>
+        <button class="win-btn win-btn--close" id="win-close" aria-label="关闭">&#x2715;</button>
+      </div>
+    </header>
+
+    <!-- 主导航 -->
+    <nav class="topnav" aria-label="主导航">
+      <div class="topnav__history">
+        <button class="hbtn" id="nav-back" aria-label="后退">&#x2190;</button>
+        <button class="hbtn" id="nav-fwd" aria-label="前进">&#x2192;</button>
+      </div>
+      <a class="nav-item" data-route="/store" href="#/store">商店</a>
+      <a class="nav-item" data-route="/library" href="#/library">库</a>
+      <span class="nav-item nav-item--soon" id="nav-community" aria-disabled="true" title="离线体验不可用">社区</span>
+      <div class="topnav__spacer"></div>
+      <button class="hbtn hbtn--wide" id="nav-downloads" title="下载队列">&#x2B07; 下载</button>
+      <button class="hbtn hbtn--wide" id="nav-settings" title="设置">&#x2699; 设置</button>
+    </nav>
+
+    <!-- 主体：左侧游戏栏 + 中央内容 -->
+    <div class="app-body">
+      <aside class="rail" aria-label="游戏栏">
+        <div class="rail__top">
+          <button class="rail__home" id="rail-home">主页</button>
+          <button class="rail__gridbtn" id="rail-grid" title="视图切换（演示）">&#x25A6;</button>
+        </div>
+        <div class="rail__filters">
+          <div class="rail__select">游戏和软件 <span class="rail__caret">&#x25BE;</span></div>
+          <select class="rail__ctl" id="rail-filter" aria-label="筛选" title="筛选">
+            <option value="all">全部</option>
+            <option value="installed">已安装</option>
+            <option value="notinstalled">未安装</option>
+          </select>
+          <select class="rail__ctl" id="rail-sort" aria-label="排序" title="排序">
+            <option value="default">默认排序</option>
+            <option value="recent">最近使用</option>
+          </select>
+        </div>
+        <div class="rail__search">
+          <span class="search__icon">&#x1F50D;</span>
+          <input type="text" id="search-input" placeholder="搜索" autocomplete="off" />
+        </div>
+        <div class="rail__scroll">
+          <div class="rail__group">&#x2014; 收藏夹 <span class="rail__count" id="rail-fav">(0)</span></div>
+          <ul class="rail__list rail__list--fav" id="rail-fav-list"></ul>
+          <div class="rail__group">&#x2014; 未分类 <span class="rail__count" id="rail-uncat">(0)</span></div>
+          <ul class="rail__list" id="rail-list"></ul>
+        </div>
+      </aside>
+      <main id="view" class="view"></main>
+    </div>
+
+    <!-- 底部状态栏 -->
+    <footer class="statusbar">
+      <button class="sb-btn" id="sb-add"><span class="sb-ico">&#x1F7A7;</span> 添加游戏</button>
+      <button class="sb-btn sb-btn--center" id="sb-downloads"><span class="sb-ico">&#x2B07;</span> 管理下载</button>
+      <button class="sb-btn sb-btn--right" id="sb-friends" aria-disabled="true">好友与聊天 <span class="sb-ico">&#x25A6;</span></button>
+    </footer>
+  </div>
+  <div class="toast" id="toast" hidden></div>
+  <div class="welcome" id="welcome" hidden>
+    <div class="welcome__box">
+      <div class="welcome__title">欢迎来到不玩游戏</div>
+      <div class="welcome__body">这是一个完全离线的虚拟体验。它不会连接游戏服务器、下载真实文件或启动外部程序。你可以像使用游戏客户端一样，浏览、获取和收藏虚构游戏。</div>
+      <button class="btn btn--primary welcome__btn" id="welcome-enter">进入体验</button>
+    </div>
+  </div>
+  <!-- 安装确认弹窗（§5.3，内容由 flow/dialogs.js 动态填充） -->
+  <div class="overlay" id="install-dialog" hidden>
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="install-title">
+      <div class="dialog__title" id="install-title">安装</div>
+      <div class="dialog__body" id="install-body"></div>
+      <div class="dialog__note">此操作只模拟下载与安装，不会写入真实游戏文件。</div>
+      <div class="dialog__actions">
+        <button class="btn" id="install-cancel">取消</button>
+        <button class="btn btn--primary" id="install-confirm">开始获取</button>
+      </div>
+    </div>
+  </div>
+  <!-- 本地个人卡（§8.1，内容由 flow/dialogs.js 动态填充） -->
+  <div class="overlay" id="profile-card" hidden>
+    <div class="dialog profilecard" role="dialog" aria-modal="true" aria-labelledby="profile-title">
+      <div class="dialog__title" id="profile-title">本地访客</div>
+      <div class="dialog__body" id="profile-body"></div>
+      <div class="dialog__actions">
+        <button class="btn" id="profile-close">关闭</button>
+      </div>
+    </div>
+  </div>
+  <!-- 关于弹窗（§4.2 帮助菜单，内容由 flow/dialogs.js 动态填充） -->
+  <div class="overlay" id="about-dialog" hidden>
+    <div class="dialog about" role="dialog" aria-modal="true" aria-labelledby="about-title">
+      <div class="dialog__title" id="about-title">关于不玩游戏</div>
+      <div class="dialog__body" id="about-body"></div>
+      <div class="dialog__actions">
+        <button class="btn btn--primary" id="about-close">关闭</button>
+      </div>
+    </div>
+  </div>
+  <!-- 送心意弹窗（批次 6，内容由 flow/dialogs.js 动态填充） -->
+  <div class="overlay" id="gift-dialog" hidden>
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="gift-title">
+      <div class="dialog__title" id="gift-title">送一份心意</div>
+      <div class="dialog__body" id="gift-body"></div>
+      <div class="dialog__actions">
+        <button class="btn" id="gift-cancel">取消</button>
+        <button class="btn btn--primary" id="gift-confirm">送出 6 心意</button>
+      </div>
+    </div>
+  </div>
+  <!-- 徽章详情弹窗（批次 6，内容由 flow/dialogs.js 动态填充） -->
+  <div class="overlay" id="badge-dialog" hidden>
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="badge-title">
+      <div class="dialog__title" id="badge-title">徽章</div>
+      <div class="dialog__body" id="badge-body"></div>
+      <div class="dialog__actions">
+        <button class="btn btn--primary" id="badge-close">知道了</button>
+      </div>
+    </div>
+  </div>
+  <!-- 伪启动画面（§3.5，内容由 flow/launch.js 动态填充） -->
+  <div class="splash" id="splash" hidden>
+    <div class="splash__inner" id="splash-inner">
+      <div class="splash__publisher" id="splash-publisher"></div>
+      <div class="splash__title" id="splash-title"></div>
+      <div class="splash__loading"><i></i><i></i><i></i></div>
+      <div class="splash__skip" id="splash-skip" hidden>点击或按任意键跳过</div>
+    </div>
+  </div>
+</body>
+</html>
