@@ -264,7 +264,7 @@ button, a { font-family: inherit; }
 
 /* ---- 骨架：上下三段（标题栏+导航 / 主体 / 状态栏） ---- */
 #app { flex-direction: column; }
-.app-body { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.app-body { flex: 1; min-height: 0; display: flex; flex-direction: row; }
 
 /* ---- 顶部标题栏 ---- */
 .titlebar {
@@ -311,9 +311,14 @@ button, a { font-family: inherit; }
 .topnav__history { display: flex; gap: 2px; margin-right: 8px; }
 .hbtn {
   min-width: 30px; height: 30px; padding: 0 8px;
+  display: inline-flex; align-items: center; justify-content: center;
   border: none; border-radius: 3px; background: transparent;
   color: #8f98a0; font-size: 14px; cursor: pointer;
+  transition: background .12s ease, color .12s ease;
 }
+.hbtn svg { display: block; }
+.hbtn[disabled] { color: #3f4a57; cursor: default; }
+.hbtn[disabled]:hover { background: transparent; color: #3f4a57; }
 .hbtn:hover { background: rgba(255, 255, 255, .08); color: #fff; }
 .hbtn--wide { font-size: 12.5px; }
 .topnav .nav-item {
@@ -352,12 +357,14 @@ button, a { font-family: inherit; }
   color: #8f98a0; font-size: 15px; cursor: pointer;
 }
 .rail__gridbtn:hover { background: rgba(255, 255, 255, .12); color: #fff; }
-.rail__filters { display: flex; gap: 6px; padding: 0 10px 8px; }
+.rail__filters { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 10px 8px; }
 .rail__select {
-  flex: 1; display: flex; align-items: center; justify-content: space-between;
+  flex: 1 1 100%; display: flex; align-items: center; justify-content: space-between;
   padding: 7px 10px; background: rgba(0, 0, 0, .25); border-radius: 2px;
   color: #8f98a0; font-size: 12.5px; cursor: default;
+  white-space: nowrap; overflow: hidden;
 }
+.rail__filters .rail__ctl { flex: 1 1 0; min-width: 0; }
 .rail__search {
   display: flex; align-items: center; gap: 8px;
   margin: 0 10px 10px; padding: 7px 10px;

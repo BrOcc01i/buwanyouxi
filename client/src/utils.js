@@ -4,7 +4,7 @@ export function fmtSize(mb) {
     const gb = mb / 1024;
     return (gb >= 10 ? gb.toFixed(0) : gb.toFixed(1)) + ' GB';
   }
-  return mb + ' MB';
+  return Math.round(mb) + ' MB';
 }
 
 export function fmtOwners(n) {

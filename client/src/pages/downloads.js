@@ -19,8 +19,9 @@ export function renderDownloads(view) {
 
   function update() {
     const state = getState();
-    // struct 必须含 paused/stage/progress/id：暂停切换、进度推进、阶段变化都需触发重渲染
-    const struct = state.downloads.map(d => d.id + ':' + d.stage + ':' + (d.paused ? 'p' : 'r') + ':' + Math.round((d.progress || 0) * 100)).join('|');
+    // struct 只含 id/stage/paused：进度不再进结构键 —— 否则每推进 1% 就重建整个 DOM，画面会频闪。
+    // 进度相关的数值全部走 updateLive()（只改文本与宽度），结构只在阶段切换/暂停时重建。
+    const struct = state.downloads.map(d => d.id + ':' + d.stage + ':' + (d.paused ? 'p' : 'r')).join('|');
     if (struct !== lastStruct) {
       lastStruct = struct;
       render(state);
