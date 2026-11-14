@@ -18,7 +18,7 @@ const DRY = process.argv.includes('--dry');
 const REVIEW = process.argv.includes('--review');
 
 const COVER = '01-cover.webp';
-const DISPLAY = ['02-library.webp', '03-downloading.webp', '04-detail.webp', '05-reveal.webp', '06-settings.webp', '07-store-downloading.webp'];
+const DISPLAY = ['02-library.webp', '03-downloading.webp', '04-detail.webp', '05-gift.webp', '06-reveal.webp', '07-store-downloading.webp'];
 const MAX_BYTES = 1400000;
 
 const sha256 = b => crypto.createHash('sha256').update(b).digest('hex');

@@ -42,9 +42,11 @@ const lastEvent = (name) => [...getState().events].reverse().find(e => e.event =
 
 /* ================= 状态基础 ================= */
 
-test('初始为 v2 空状态', () => {
+test('初始为 v3 空状态（含心意钱包与礼物）', () => {
   const s = getState();
-  assert.equal(s.version, 2);
+  assert.equal(s.version, 3);
+  assert.deepEqual(s.wallet, { balance: 66, spent: 0 });
+  assert.deepEqual(s.gifts, []);
   assert.deepEqual(s.library, {});
   assert.deepEqual(s.downloads, []);
   assert.equal(s.settings.reducedMotion, false);
@@ -370,14 +372,14 @@ test('resetAllData 后全空（含 data_reset 事件）', () => {
   assert.notEqual(getState().profile.badges.length, 0);
   store.resetAllData();
   const s = getState();
-  assert.equal(s.version, 2);
+  assert.equal(s.version, 3);
   assert.deepEqual(s.library, {});
   assert.deepEqual(s.downloads, []);
   assert.deepEqual(s.profile.badges, []);
   assert.equal(s.events.length, 1);
   assert.equal(s.events[0].event, 'data_reset');
   const persisted = JSON.parse(localStorage.getItem(STORAGE_KEY));
-  assert.equal(persisted.version, 2);
+  assert.equal(persisted.version, 3);
   assert.deepEqual(persisted.downloads, []);
 });
 
@@ -397,7 +399,7 @@ test('v1→v2 迁移：favorites→favorite、字段补齐、活动任务保留 
     favorites: ['stardust-miner'],
     settings: { reducedMotion: true },
   });
-  assert.equal(s.version, 2);
+  assert.equal(s.version, 3);
   assert.equal(s.library['stardust-miner'].favorite, true, 'v1 favorites → favorite');
   assert.equal(s.library['cloud-bakery'].favorite, false);
   assert.equal(s.library['stardust-miner'].lastLaunchedAt, null);
@@ -423,7 +425,7 @@ test('v1→v2 迁移：favorites→favorite、字段补齐、活动任务保留 
 
 test('损坏/缺字段输入安全降级为空状态', () => {
   const s = store.normalize(undefined);
-  assert.equal(s.version, 2);
+  assert.equal(s.version, 3);
   assert.deepEqual(s.library, {});
   assert.deepEqual(s.downloads, []);
 });

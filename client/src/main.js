@@ -10,9 +10,10 @@ import { startEngine } from './state/download-engine.js';
 import { getState, recordAppOpen, subscribe, markWelcomeSeen } from './state/store.js';
 import { planCompletionFx } from './state/completion.js';
 import { GAME_MAP } from './data/games.js';
+import { BADGES } from './data/badges.js';
 import { initShell, showToast } from './shell.js';
 import { playComplete } from './sound.js';
-import { initInstallDialog, initProfileCard, initAboutDialog } from './flow/dialogs.js';
+import { initInstallDialog, initProfileCard, initAboutDialog, initGiftDialog, initBadgeDialog, setGiftSentHandler } from './flow/dialogs.js';
 
 // 调试暴露（供自动化验收读取状态，不影响生产逻辑）
 window.__debug = { getState };
@@ -46,9 +47,25 @@ try {
 /* ============ 下载完成：声音 + 通知（规格②） ============ */
 const nw = window.nwApp || {};
 let knownCompleted = new Set(getState().downloads.filter(d => d.stage === 'COMPLETED').map(d => d.id));
+// 徽章解锁提示：初始集合取自加载时状态，避免刷新后把已有徽章再报一遍
+let knownBadges = new Set(getState().profile.badges.map(b => b.badgeId));
+// 启动后的第一次派发（recordAppOpen）会把「状态里早该有、但历史版本没发」的徽章补齐，
+// 这属于同步而非用户当下解锁 → 首帧只吸收、不弹提示
+let bootSynced = false;
 subscribe(() => {
   const state = getState();
   applyReducedMotion(state.settings);
+  if (!bootSynced) {
+    bootSynced = true;
+    knownBadges = new Set(state.profile.badges.map(b => b.badgeId));
+  } else {
+    for (const b of state.profile.badges) {
+      if (knownBadges.has(b.badgeId)) continue;
+      knownBadges.add(b.badgeId);
+      const meta = BADGES[b.badgeId];
+      if (meta) { try { showToast('解锁徽章 · ' + meta.name); } catch (e) { /* 静默 */ } }
+    }
+  }
   const completedNow = state.downloads.filter(d => d.stage === 'COMPLETED');
   const nowIds = new Set(completedNow.map(d => d.id));
   // 仅对「新进入 COMPLETED」的任务触发（不重放历史已完成记录）
@@ -104,3 +121,7 @@ initWelcome();
 initInstallDialog();
 initProfileCard();
 initAboutDialog();
+initGiftDialog();
+initBadgeDialog();
+// 送礼成功提示由入口统一提供，dialogs 不反向依赖壳层
+setGiftSentHandler((game, amount) => { try { showToast(`已向《${game.name}》送出 ${amount} 心意`); } catch (e) { /* 静默 */ } });

@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>不玩游戏</title>
+  <link rel="icon" type="image/png" href="./assets/app/icon.png" />
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
@@ -137,6 +138,27 @@
       <div class="dialog__body" id="about-body"></div>
       <div class="dialog__actions">
         <button class="btn btn--primary" id="about-close">关闭</button>
+      </div>
+    </div>
+  </div>
+  <!-- 送心意弹窗（批次 6，内容由 flow/dialogs.js 动态填充） -->
+  <div class="overlay" id="gift-dialog" hidden>
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="gift-title">
+      <div class="dialog__title" id="gift-title">送一份心意</div>
+      <div class="dialog__body" id="gift-body"></div>
+      <div class="dialog__actions">
+        <button class="btn" id="gift-cancel">取消</button>
+        <button class="btn btn--primary" id="gift-confirm">送出 6 心意</button>
+      </div>
+    </div>
+  </div>
+  <!-- 徽章详情弹窗（批次 6，内容由 flow/dialogs.js 动态填充） -->
+  <div class="overlay" id="badge-dialog" hidden>
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="badge-title">
+      <div class="dialog__title" id="badge-title">徽章</div>
+      <div class="dialog__body" id="badge-body"></div>
+      <div class="dialog__actions">
+        <button class="btn btn--primary" id="badge-close">知道了</button>
       </div>
     </div>
   </div>

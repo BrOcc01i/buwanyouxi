@@ -1,9 +1,19 @@
 {
   "generated_for": "9934 submission",
+  "build": "batch6 (badge wall + gift)",
   "constraint": {
     "max_image_input_bytes": 1400000,
     "display_max_items": 6
   },
+  "cover": "01-cover.webp",
+  "display": [
+    "02-library.webp",
+    "03-downloading.webp",
+    "04-detail.webp",
+    "05-gift.webp",
+    "06-reveal.webp",
+    "07-store-downloading.webp"
+  ],
   "items": [
     {
       "file": "01-cover.webp",
@@ -12,8 +22,8 @@
     },
     {
       "file": "02-library.webp",
-      "bytes": 106140,
-      "sha256": "1e43909edf6f77f1ef1c4ffbd1a0144ec03c77f935a622409d7c08d8523567fa"
+      "bytes": 42494,
+      "sha256": "75b23678f28a09062b3c560466080d61100749b89310384ab6312cd4deae0ce0"
     },
     {
       "file": "03-downloading.webp",
@@ -22,18 +32,18 @@
     },
     {
       "file": "04-detail.webp",
-      "bytes": 136128,
-      "sha256": "aa4f51440bbf2e15a9763f91733c124b43048e3704cd6aacc0a34a30643728c5"
+      "bytes": 136248,
+      "sha256": "37b9e6c095f918a2542cf7d9ab0ed8005b7a593df9a5b9e6d0b8f71486ce5419"
     },
     {
-      "file": "05-reveal.webp",
-      "bytes": 43812,
-      "sha256": "d2380b44b56921c7706ceafbcdfad8272afd6d46e8fe84173eea509f8b81c901"
+      "file": "05-gift.webp",
+      "bytes": 46166,
+      "sha256": "758a4fdc9184b6f9dd408fd1c559fccb9e1b5bf64f6db5c1add5f0568b7951a8"
     },
     {
-      "file": "06-settings.webp",
-      "bytes": 34426,
-      "sha256": "fdea80f97b7e4700ea81ae5c63d4e63a22b381196a018a976adf8b4755b6ad31"
+      "file": "06-reveal.webp",
+      "bytes": 45022,
+      "sha256": "e137f96003acfb07e0b6307771e6a235a96d7a059a10be8b70be1cd762e9f6a6"
     },
     {
       "file": "07-store-downloading.webp",

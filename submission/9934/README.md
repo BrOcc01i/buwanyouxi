@@ -12,12 +12,14 @@
 |---|---|
 | 可玩网页版 | ✅ 已发布 <https://wbapp-2dudtnqv6wzny0cakya40o.app.workbuddy.host/?sharecode=MTHIS5RECT> |
 | 浏览器实测 | ✅ 5 个路由全渲染，0 个 ≥400 响应，0 破图 |
-| 封面 | ✅ `media/01-cover.webp`（133 KB） |
-| 展示图 6 张 | ✅ `media/02…07`，最大 136 KB（限额 1,400,000 B） |
-| 正文文案 | ✅ `payload.json` |
+| 封面 | ✅ `media/01-cover.webp`（130 KB） |
+| 展示图 6 张 | ✅ `media/02…07`，最大 133 KB（限额 1,400,000 B） |
+| 正文文案 | ✅ `payload.json`（含批次 6 的徽章与心意） |
 | 执行脚本 | ✅ `submit.mjs`（`--dry` 校验通过，仅 `source_url` 未定稿） |
 | 作者令牌 | ❌ 待本人签发 |
 | `source_url` | ❌ 待定（建议 GitHub 仓库） |
+
+> ⚠️ 线上链接目前仍是**批次 6 之前**的构建；徽章墙与心意礼物要等重新发布后才在线可见。重发后需再跑一次 Playwright 截图复核。
 
 ## 站点硬性约束（摘自公开契约）
 
@@ -53,8 +55,9 @@ NW9934_TOKEN=... node submit.mjs --review
 
 ## 素材来源
 
-- `01/02/04/05/06/07`：`client/tests/visual-baseline/*_1920x1080.png`（与当前构建像素级一致，`npm run visual:compare` 26/26 通过）
+- `01/02/04/06/07`：`client/tests/visual-baseline/*_1920x1080.png`（与当前构建像素级一致，`npm run visual:compare` 26/26 通过）
 - `03`：临时脚本按「下载中」状态实拍 1920×1080（基线里的下载页是暂停态，不适合做展示）
+- `05`：送礼弹窗实拍 1920×1080
 - `raw/` 保留原始 PNG，便于换尺寸重出
 
 ## 若改用 GitHub Pages

@@ -104,7 +104,7 @@ test('v1 legacy 迁移（§7.3）：PAUSED+pausedFrom → paused/resumeStage；e
     ],
   };
   const out = normalize(legacy);
-  assert.equal(out.version, 2);
+  assert.equal(out.version, 3);
   const [t1, t2] = out.downloads;
   assert.equal(t1.paused, true);
   assert.equal(t1.resumeStage, 'DOWNLOADING');
@@ -136,7 +136,7 @@ test('normalize 容错：无效 stage/progress/垃圾条目安全降级，不崩
 test('损坏/缺失输入：normalize(null/undefined/标量) → 空状态骨架，不抛异常', () => {
   for (const bad of [null, undefined, 42, 'str']) {
     const out = normalize(bad);
-    assert.equal(out.version, 2);
+    assert.equal(out.version, 3);
     assert.deepEqual(out.downloads, []);
     assert.deepEqual(out.library, {});
   }

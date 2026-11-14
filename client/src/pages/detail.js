@@ -7,7 +7,7 @@ import { fmtSize, artImg } from '../utils.js';
 import { getState, subscribe } from '../state/store.js';
 import { setSelectedGame } from '../state/ui.js';
 import { startDownload } from '../state/download-engine.js';
-import { openInstallDialog } from '../flow/dialogs.js';
+import { openInstallDialog, openGiftDialog } from '../flow/dialogs.js';
 import { startLaunchFlow, launchDestination } from '../flow/launch.js';
 
 export function renderDetail(view, params) {
@@ -48,6 +48,7 @@ export function renderDetail(view, params) {
             <div class="storedetail__fact"><span>体积</span><b>${fmtSize(g.sizeMB)}</b></div>
           </div>
           <div class="storedetail__actions" id="detail-actions"></div>
+          <div class="giftbox" id="gift-box"></div>
           <div class="storedetail__hint">本地虚构数据 · 获取人数与评分均为虚构常量 · 不真实下载</div>
         </div>
       </div>
@@ -65,6 +66,8 @@ export function renderDetail(view, params) {
     const actions = view.querySelector('#detail-actions');
     if (!actions) return;
 
+    renderGiftBox(state);
+
     if (status !== lastStatus) {
       lastStatus = status;
       actions.innerHTML = buildActions(status, lib, g);
@@ -73,6 +76,22 @@ export function renderDetail(view, params) {
       const pct = actions.querySelector('#dl-pct');
       if (pct) pct.textContent = Math.round(lib.progress * 100) + '%';
     }
+  }
+
+  // 心意区块：余额 + 本作累计，纯本地模拟，任何时候都能送（不要求先获取）
+  function renderGiftBox(state) {
+    const box = view.querySelector('#gift-box');
+    if (!box) return;
+    const balance = (state.wallet && state.wallet.balance) || 0;
+    const sent = (state.gifts || []).filter(x => x.gameId === g.id).reduce((n, x) => n + x.amount, 0);
+    box.innerHTML = `
+      <div class="giftbox__head">
+        <span class="giftbox__title">💝 心意</span>
+        <span class="giftbox__bal">余额 ${balance} 点</span>
+      </div>
+      <div class="giftbox__sent">本作已收到 ${sent} 点 · 仅存本机，不涉及真实支付</div>
+      <button class="btn btn--ghost btn--sm giftbox__btn" id="gift-btn">送一份心意</button>`;
+    box.querySelector('#gift-btn')?.addEventListener('click', () => openGiftDialog(g));
   }
 
   function buildActions(status, lib, g) {

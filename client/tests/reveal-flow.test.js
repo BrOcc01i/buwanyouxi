@@ -154,12 +154,14 @@ test('buildResultSummary：问卷未提交返回 null；提交后字段完整、
 
 test('buildResultSummary：下载记录被清除时回退到累计等待时长', () => {
   reset();
+  // 批次 6 起徽章由状态自动派生：completedDownloads=0 时 first_download 不会被自动补发，
+  // 才能走到「结果卡徽章为空」这条分支
   store.dispatch(s => ({
     ...s,
     profile: {
       ...s.profile,
       revealSeen: true, firstRevealGameId: 'stardust-miner',
-      stats: { completedDownloads: 1, launchTotal: 1, simulatedWaitMs: 45000 },
+      stats: { completedDownloads: 0, launchTotal: 1, simulatedWaitMs: 45000 },
     },
   }));
   store.submitSurvey({ q1: 2, q2: '看着下载进度推进' }); // Q1≤2 → 清醒观察者

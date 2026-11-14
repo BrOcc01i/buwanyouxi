@@ -1,7 +1,8 @@
-// 全局状态、订阅与持久化（v1.0 批次 1：v2 状态模型 + v1→v2 迁移）
-// 存储 key：nw_client_state_v1（键不变，内部 version: 2）
+// 全局状态、订阅与持久化（v1.0 批次 1：v2 状态模型 + v1→v2 迁移；批次 6：v3 增加心意钱包与礼物）
+// 存储 key：nw_client_state_v1（键不变，内部 version: 3）
 // 安全处理：localStorage 不可用 / JSON 损坏 / 缺字段 / 迁移失败 → 降级为空状态，页面不崩溃
 'use strict';
+import { evaluateBadges } from './badge-rules.js';
 
 const STORAGE_KEY = 'nw_client_state_v1';
 // 应用版本（批次 5 P2-1 / 关卡 A 返修 P0-2）：唯一兜底常量；Electron 注入 nwApp.version 时优先
@@ -21,13 +22,16 @@ const OWNER_BY_Q2 = {
   '没什么感觉': '清醒观察者',
 };
 const MAX_EVENTS = 500;
+// 心意（本地虚拟货币）：三档固定面额与初始余额，纯离线，不涉及任何真实支付
+export const GIFT_TIERS = [6, 18, 66];
+export const WALLET_START = 66;
 // Q3 选填开放文本：仅接受字符串，超长截断到 200（安全降级，不阻塞提交）
 const MAX_Q3 = 200;
 const normQ3 = v => (typeof v === 'string' ? v.slice(0, MAX_Q3) : null);
 
 export function emptyState() {
   return {
-    version: 2,
+    version: 3,
     library: {},    // { gameId: { gameId, status, ownedAt, installedAt, progress, favorite, lastLaunchedAt, launchCount } }
     downloads: [],  // [{ id, gameId, stage, resumeStage, progress, paused, stageElapsedMs, stageDurationMs, totalElapsedMs, queuedAt, startedAt, completedAt, speedMBps, etaSec }]
     settings: { reducedMotion: false, soundEnabled: true, notificationsEnabled: true, defaultRoute: '#/store' },
@@ -36,6 +40,8 @@ export function emptyState() {
       badges: [],   // [{ badgeId, unlockedAt }]
       stats: { completedDownloads: 0, launchTotal: 0, simulatedWaitMs: 0 },
     },
+    wallet: { balance: WALLET_START, spent: 0 },  // 心意余额与累计送出
+    gifts: [],      // [{ gameId, amount, at }]
     survey: null,   // { q1, q2, ownerType, submittedAt }
     events: [],     // [{ ts, event, gameId, extra }] 上限 500 条
   };
@@ -134,7 +140,8 @@ function normalizeTask(d, legacy) {
 function normalize(input) {
   const out = emptyState();
   if (!input || typeof input !== 'object') return out;
-  const legacy = input.version !== 2;
+  // v1 = 无 version 或 version:1；v2/v3 均为现行结构（v3 只新增 wallet/gifts，字段向后兼容）
+  const legacy = input.version !== 2 && input.version !== 3;
 
   // library（含 v1 favorites → favorite 迁移）
   const legacyFavs = legacy && Array.isArray(input.favorites)
@@ -184,6 +191,20 @@ function normalize(input) {
     }
   }
 
+  // wallet（v3 新增）：缺失时补初始余额，丢弃非法值
+  if (input.wallet && typeof input.wallet === 'object') {
+    const balance = typeof input.wallet.balance === 'number' && Number.isFinite(input.wallet.balance)
+      ? Math.max(0, Math.floor(input.wallet.balance)) : WALLET_START;
+    out.wallet = { balance, spent: numOr(input.wallet.spent, 0) };
+  }
+
+  // gifts（v3 新增）：只保留结构完整的记录
+  if (Array.isArray(input.gifts)) {
+    out.gifts = input.gifts
+      .filter(g => g && typeof g === 'object' && typeof g.gameId === 'string' && GIFT_TIERS.includes(g.amount))
+      .map(g => ({ gameId: g.gameId, amount: g.amount, at: typeof g.at === 'number' ? g.at : Date.now() }));
+  }
+
   // survey
   if (input.survey && typeof input.survey === 'object'
     && Number.isInteger(input.survey.q1) && input.survey.q1 >= 1 && input.survey.q1 <= 5
@@ -220,11 +241,33 @@ export function subscribe(fn) {
   return () => { listeners.delete(fn); };
 }
 
+// 自动徽章：每次状态变更后统一评估，只补「条件已满足但尚未解锁」的，天然幂等
+// 放在 dispatch 内而非订阅回调里，避免 dispatch → 订阅 → dispatch 的重入
+function withAutoBadges(s) {
+  let hits;
+  try { hits = evaluateBadges(s); } catch (e) { return s; }
+  if (!hits || !hits.length) return s;
+  const owned = new Set(s.profile.badges.map(b => b.badgeId));
+  const fresh = hits.filter(h => !owned.has(h.id));
+  if (!fresh.length) return s;
+  const now = Date.now();
+  let events = s.events;
+  for (const h of fresh) events = pushEvent(events, 'badge_unlock', h.gameId || null, { badgeId: h.id });
+  return {
+    ...s,
+    profile: {
+      ...s.profile,
+      badges: [...s.profile.badges, ...fresh.map(h => ({ badgeId: h.id, unlockedAt: now }))],
+    },
+    events,
+  };
+}
+
 // dispatch：传入 (state) => nextState 的纯更新函数，返回新对象则提交
 function dispatch(updater) {
   const next = updater(state);
   if (!next || next === state) return;
-  state = next;
+  state = withAutoBadges(next);
   persist();
   listeners.forEach(fn => { try { fn(state); } catch (e) { /* 忽略订阅回调异常 */ } });
 }
@@ -297,6 +340,42 @@ export function unlockBadge(badgeId, gameId) {
   return added;
 }
 
+// 送心意（批次 6）：三档固定面额，余额不足或档位非法直接拒绝，不改状态
+// 纯本地模拟，不涉及支付通道、不产生任何网络请求
+export function sendGift(gameId, amount) {
+  const value = Number(amount);
+  if (!GIFT_TIERS.includes(value)) return { ok: false, reason: '心意档位无效' };
+  if (typeof gameId !== 'string' || !gameId) return { ok: false, reason: '未指定游戏' };
+  const wallet = getState().wallet;
+  if (wallet.balance < value) return { ok: false, reason: '心意余额不足，可先补充' };
+  dispatch(s => ({
+    ...s,
+    wallet: { balance: s.wallet.balance - value, spent: s.wallet.spent + value },
+    gifts: [...s.gifts, { gameId, amount: value, at: Date.now() }],
+    events: pushEvent(s.events, 'gift_send', gameId, { amount: value }),
+  }));
+  return { ok: true, balance: getState().wallet.balance };
+}
+
+// 补满心意：仅当余额低于初始值时才补，避免无意义的空写入
+export function refillWallet() {
+  const { balance } = getState().wallet;
+  if (balance >= WALLET_START) return { ok: false, reason: '心意已满' };
+  dispatch(s => ({
+    ...s,
+    wallet: { ...s.wallet, balance: WALLET_START },
+    events: pushEvent(s.events, 'wallet_refill', null, null),
+  }));
+  return { ok: true, balance: WALLET_START };
+}
+
+// 某款游戏累计收到的心意（0 表示没送过）
+export function giftTotalFor(gameId) {
+  return getState().gifts
+    .filter(g => g.gameId === gameId)
+    .reduce((sum, g) => sum + g.amount, 0);
+}
+
 // 问卷提交（§3.8）：Q1(1-5) 必填、Q2 必填单选、Q3 选填（字符串≤200，允许空）；失败不改状态
 export function submitSurvey(payload) {
   const q1 = payload ? Number(payload.q1) : NaN;
@@ -324,6 +403,8 @@ export function buildExportPayload() {
     exportedAt: new Date().toISOString(),
     appVersion,
     profile: s.profile,
+    wallet: s.wallet,
+    gifts: s.gifts,
     library: s.library,
     downloads: s.downloads,
     settings: s.settings,

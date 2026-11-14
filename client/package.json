@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "node electron/run.js",
     "build": "vite build",
-    "test": "node --test tests/state.test.js tests/completion.test.js tests/restart.test.js tests/reveal-flow.test.js tests/library-flow.test.js tests/store-flow.test.js tests/migration.test.js",
+    "test": "node --test tests/state.test.js tests/completion.test.js tests/restart.test.js tests/reveal-flow.test.js tests/library-flow.test.js tests/store-flow.test.js tests/migration.test.js tests/features.test.js",
     "visual:compare": "node tools/visual-run.cjs compare",
     "visual:capture": "node tools/visual-run.cjs capture",
     "start": "cross-env NODE_ENV=production node electron/run.js",

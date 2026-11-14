@@ -1,7 +1,7 @@
 // 通用弹窗：安装确认（§5.3）与本地个人卡（§8.1）
 'use strict';
-import { getState, APP_VERSION } from '../state/store.js';
-import { fmtSize } from '../utils.js';
+import { getState, APP_VERSION, sendGift, refillWallet, GIFT_TIERS, WALLET_START } from '../state/store.js';
+import { fmtSize, fmtLaunchDate } from '../utils.js';
 import { BADGES } from '../data/badges.js';
 
 // 模拟可用空间（固定值 256 GB，恒大于全部虚构游戏体积，§5.3）
@@ -125,4 +125,107 @@ export function initAboutDialog() {
   if (!root) return;
   document.getElementById('about-close')?.addEventListener('click', () => setOpen('about-dialog', false));
   root.addEventListener('click', (e) => { if (e.target === root) setOpen('about-dialog', false); });
+}
+
+/* ================= 送心意弹窗（批次 6） ================= */
+
+let pendingGiftGame = null;
+let pendingTier = GIFT_TIERS[0];
+
+function paintGiftBody() {
+  const body = document.getElementById('gift-body');
+  const confirm = document.getElementById('gift-confirm');
+  if (!body || !pendingGiftGame) return;
+  const { balance } = getState().wallet;
+  const g = pendingGiftGame;
+  body.innerHTML = `
+    <div class="dialog__game">
+      <span class="dialog__game-ico" style="background:linear-gradient(135deg, ${g.gradient.join(',')})">${g.emoji}</span>
+      <div>
+        <div class="dialog__game-name">${g.name}</div>
+        <div class="dialog__game-size">送给 ${g.developer}</div>
+      </div>
+    </div>
+    <div class="gift__balance">当前心意 <b>${balance}</b> 点<span class="gift__hint">仅存本机</span></div>
+    <div class="gift__tiers">
+      ${GIFT_TIERS.map(v => `
+        <button class="gift__tier ${v === pendingTier ? 'is-active' : ''}" data-tier="${v}" ${balance < v ? 'disabled' : ''}>
+          <b>${v}</b><small>心意</small>
+        </button>`).join('')}
+    </div>
+    ${balance < WALLET_START ? `<button class="btn btn--sm gift__refill" id="gift-refill">补充到 ${WALLET_START} 点</button>` : ''}`;
+  body.querySelectorAll('[data-tier]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      pendingTier = Number(btn.dataset.tier);
+      body.querySelectorAll('[data-tier]').forEach(b => b.classList.toggle('is-active', Number(b.dataset.tier) === pendingTier));
+      if (confirm) { confirm.textContent = `送出 ${pendingTier} 心意`; confirm.disabled = balance < pendingTier; }
+    });
+  });
+  body.querySelector('#gift-refill')?.addEventListener('click', () => {
+    refillWallet();
+    paintGiftBody();
+  });
+  if (confirm) { confirm.textContent = `送出 ${pendingTier} 心意`; confirm.disabled = balance < pendingTier; }
+}
+
+export function openGiftDialog(game) {
+  if (!game || !document.getElementById('gift-body')) return;
+  pendingGiftGame = game;
+  pendingTier = GIFT_TIERS[0];
+  paintGiftBody();
+  setOpen('gift-dialog', true);
+}
+
+export function closeGiftDialog() {
+  pendingGiftGame = null;
+  setOpen('gift-dialog', false);
+}
+
+export function initGiftDialog() {
+  const root = document.getElementById('gift-dialog');
+  if (!root) return;
+  document.getElementById('gift-cancel')?.addEventListener('click', closeGiftDialog);
+  document.getElementById('gift-confirm')?.addEventListener('click', () => {
+    if (!pendingGiftGame) return;
+    const game = pendingGiftGame;
+    const res = sendGift(game.id, pendingTier);
+    if (!res.ok) { paintGiftBody(); return; }
+    closeGiftDialog();
+    if (typeof onGiftSent === 'function') onGiftSent(game, pendingTier);
+  });
+  root.addEventListener('click', (e) => { if (e.target === root) closeGiftDialog(); });
+}
+
+// 由调用方（页面）注入的成功回调，避免 dialogs 反向依赖 shell 的 Toast
+let onGiftSent = null;
+export function setGiftSentHandler(fn) { onGiftSent = typeof fn === 'function' ? fn : null; }
+
+/* ================= 徽章详情弹窗（批次 6） ================= */
+
+export function openBadgeDialog(badgeId, record) {
+  const b = BADGES[badgeId];
+  const body = document.getElementById('badge-body');
+  if (!b || !body) return;
+  const unlocked = !!record;
+  body.innerHTML = `
+    <div class="badge-hero ${unlocked ? 'is-on' : 'is-off'}">
+      <span class="badge-hero__ico">${unlocked ? b.icon : '🔒'}</span>
+      <div>
+        <div class="badge-hero__name">${b.name}</div>
+        <div class="badge-hero__state">${unlocked ? '已解锁 · ' + (fmtLaunchDate(record.unlockedAt) || '') : '尚未解锁'}</div>
+      </div>
+    </div>
+    <p class="badge-hero__desc">${b.desc}</p>
+    <div class="dialog__rows">
+      <div class="dialog__row"><span>解锁条件</span><b>${b.cond}</b></div>
+      <div class="dialog__row"><span>状态</span><b>${unlocked ? '已获得' : '待完成'}</b></div>
+    </div>`;
+  setOpen('badge-dialog', true);
+}
+
+export function initBadgeDialog() {
+  const root = document.getElementById('badge-dialog');
+  if (!root) return;
+  document.getElementById('badge-close')?.addEventListener('click', () => setOpen('badge-dialog', false));
+  root.addEventListener('click', (e) => { if (e.target === root) setOpen('badge-dialog', false); });
 }

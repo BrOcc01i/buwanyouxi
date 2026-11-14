@@ -10,9 +10,9 @@ import { getSelectedGame, setSelectedGame, subscribeSelection } from '../state/u
 import { fmtSize, artImg, artFallbackHTML, fmtLaunchDate } from '../utils.js';
 import { startDownload, pauseDownload, resumeDownload, PREPARING_LINES } from '../state/download-engine.js';
 import { pickUpNext } from '../state/lib-rules.js';
-import { openInstallDialog } from '../flow/dialogs.js';
+import { openInstallDialog, openBadgeDialog } from '../flow/dialogs.js';
 import { startLaunchFlow, launchDestination } from '../flow/launch.js';
-import { BADGES } from '../data/badges.js';
+import { BADGES, BADGE_LIST } from '../data/badges.js';
 import { showToast } from '../shell.js';
 
 export function renderLibrary(view) {
@@ -54,9 +54,8 @@ export function renderLibrary(view) {
       .sort((a, b) => (state.library[b].ownedAt || 0) - (state.library[a].ownedAt || 0));
     // §3.6：未完成问卷时显示「继续完成体验反馈」入口（已揭示且未提交问卷）
     const continueSurvey = state.profile.revealSeen && !state.survey && state.profile.firstRevealGameId;
-    // §3.4：徽章陈列区
-    const unlockedBadges = (state.profile.badges || [])
-      .map(b => BADGES[b.badgeId]).filter(Boolean);
+    // §3.4：徽章墙（批次 6 扩展为 8 枚，未解锁显示灰态与条件）
+    const unlockedIds = new Set((state.profile.badges || []).map(b => b.badgeId));
     // §6.1 接下来畅玩：规则见 state/lib-rules.js（owned/installed、排除下载中、
     // launchCount 升序 0 次优先、gameId 稳定、最多 4 款）
     const upNext = pickUpNext(
@@ -93,16 +92,19 @@ export function renderLibrary(view) {
         <div class="libhome__section">
           <div class="libhome__section-head">
             <span class="libhome__section-title">徽章</span>
+            <span class="libhome__section-hint">已解锁 ${unlockedIds.size} / ${BADGE_LIST.length}</span>
           </div>
-          ${unlockedBadges.length === 0 ? `
-            <div class="libhome__badge-empty">暂无徽章 · 完成第一款虚构游戏的下载与安装后解锁「${BADGES.first_download.name}」</div>`
-          : `<div class="libhome__badges">
-              ${unlockedBadges.map(b => `
-                <div class="libhome__badge" title="${b.desc}">
-                  <span class="libhome__badge-ico">&#127942;</span>
-                  <span><b>${b.name}</b><br><small>${b.desc}</small></span>
-                </div>`).join('')}
-            </div>`}
+          <div class="libhome__badges" id="badge-wall">
+            ${BADGE_LIST.map(b => {
+              const on = unlockedIds.has(b.id);
+              return `
+              <button class="badge-tile ${on ? 'is-on' : 'is-off'}" data-badge="${b.id}" title="${on ? b.desc : b.cond}">
+                <span class="badge-tile__ico">${on ? b.icon : '🔒'}</span>
+                <span class="badge-tile__name">${b.name}</span>
+                <span class="badge-tile__sub">${on ? '已解锁' : '未解锁'}</span>
+              </button>`;
+            }).join('')}
+          </div>
         </div>
       </div>`;
 
@@ -110,6 +112,13 @@ export function renderLibrary(view) {
     view.querySelector('#home-store-btn')?.addEventListener('click', () => { location.hash = '#/store'; });
     view.querySelector('#home-continue-survey')?.addEventListener('click', () => {
       location.hash = '#/reveal/' + state.profile.firstRevealGameId;
+    });
+
+    view.querySelectorAll('.badge-tile').forEach(el => {
+      el.addEventListener('click', () => {
+        const rec = (state.profile.badges || []).find(b => b.badgeId === el.dataset.badge);
+        openBadgeDialog(el.dataset.badge, rec || null);
+      });
     });
 
     const grid = view.querySelector('#libhome-grid');
@@ -195,6 +204,8 @@ export function renderLibrary(view) {
       uninstall: '卸载（已保留收藏、启动统计与下载记录）',
       launch: '启动了游戏（伪启动，本地记录）',
       badge_unlock: '解锁徽章',
+      gift_send: '送出心意',
+      wallet_refill: '补充了心意余额',
       survey_submit: '提交了体验反馈问卷',
       reveal: '完成了首次体验揭示',
       welcome_accept: '进入了不玩游戏',
@@ -248,7 +259,11 @@ export function renderLibrary(view) {
               ${events.map(e => `
                 <div class="libgame__tl-item">
                   <div class="libgame__tl-date">${fmtLaunchDate(e.ts) || ''}</div>
-                  <div class="libgame__tl-card"><p>${EVT_TEXT[e.event] || e.event}</p></div>
+                  <div class="libgame__tl-card"><p>${e.event === 'gift_send'
+                    ? '送出心意 ×' + ((e.extra && e.extra.amount) || 0)
+                    : e.event === 'badge_unlock'
+                      ? '解锁徽章 · ' + ((e.extra && e.extra.badgeId && BADGES[e.extra.badgeId]) ? BADGES[e.extra.badgeId].name : (e.extra && e.extra.badgeId) || '')
+                      : (EVT_TEXT[e.event] || e.event)}</p></div>
                 </div>`).join('')}
             </div>`}
           </div>
@@ -259,6 +274,7 @@ export function renderLibrary(view) {
               <div class="libgame__metarow"><span>发行商</span><b>${g.publisher}</b></div>
               <div class="libgame__metarow"><span>发行日期</span><b>${g.releaseDate}</b></div>
               <div class="libgame__metarow"><span>标签</span><b>${g.tags.join('、')}</b></div>
+              <div class="libgame__metarow"><span>收到心意</span><b>${(state.gifts || []).filter(x => x.gameId === g.id).reduce((n, x) => n + x.amount, 0)} 点</b></div>
               <div class="libgame__metarow"><span>数据来源</span><b>本地虚构常量</b></div>
             </div>
           </aside>
